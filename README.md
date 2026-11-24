@@ -1,17 +1,27 @@
-# Errand: your wallet claims its own Lido withdrawals the moment they're ready
+# Errand: your wallet sends its own follow-up transactions the moment they can succeed
 
-You ask Lido for your ETH back, and days later Lido marks the request ready. Today you then have to
-notice, come back and send a claim transaction. With Errand, your own wallet sends that claim for you.
+Some transactions can only be sent later: claiming a Lido withdrawal once Lido finalizes it, or
+withdrawing from a lending market once a borrower repays. Today you have to notice and come back. With
+Errand, your own wallet sends that transaction for you, triggered by the event that makes it possible.
 It uses one EIP-7702 signature: no bot, no server, no key handed over, and your address doesn't change.
 
-**Built at:** [Reactive Omni Buildathon](https://dorahacks.io/hackathon/reactive-omni-buildathon/detail), Nov 5 – Dec 5, 2026 · **Track:** Set It and Forget It · **Video:** not recorded yet
+Two errands are built:
 
-**Proof so far:** the reactive contract is live on Reactive mainnet and its source is verified
-([ErrandLido on Reactscan](https://reactscan.net/address/0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651),
-[deploy tx](https://reactscan.net/tx/0xbde3b9c8503df076eb9f883ac82b19314ab772f650d997a76c524308d5905c6b),
-[Sourcify exact match](https://repo.sourcify.dev/1597/0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651)).
-The Ethereum side is waiting for cheap gas (see [What's real](#whats-real)). The full loop already runs
-against real Lido data on a mainnet fork, in CI.
+1. **[Lido claim](#errand-1-claim-lido-withdrawals-set-it-and-forget-it)** (Ethereum mainnet): claims your finalized Lido withdrawals.
+2. **[Morpho exit](#errand-2-get-out-of-a-fully-borrowed-morpho-market-every-second-counts)** (Base Sepolia): gets you out of a 100%-borrowed lending market, one repayment at a time.
+   [Measured](#latency-measured-on-base-sepolia): each withdrawal lands **0.6–1.2 s** after the repayment that made it possible.
+
+**Built at:** [Reactive Omni Buildathon](https://dorahacks.io/hackathon/reactive-omni-buildathon/detail), Nov 5 – Dec 5, 2026 · **Tracks:** Set It and Forget It (Lido), Every Second Counts (Morpho) · **Video:** not recorded yet
+
+**Proof so far:**
+- **Morpho exit:** the full loop ran 7 times on Base Sepolia and Lasna, with every transaction linked [below](#latency-measured-on-base-sepolia). [ErrandMorpho on Lasna](https://lasna.reactscan.net/address/0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651) is verified ([Sourcify](https://repo.sourcify.dev/5318007/0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651)). The wallet got all 100 tUSD out of a fully borrowed market, and then Errand switched itself off.
+- **Lido claim:**
+  - Live: the reactive contract is on Reactive mainnet and its source is verified ([ErrandLido on Reactscan](https://reactscan.net/address/0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651), [deploy tx](https://reactscan.net/tx/0xbde3b9c8503df076eb9f883ac82b19314ab772f650d997a76c524308d5905c6b), [Sourcify exact match](https://repo.sourcify.dev/1597/0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651)).
+  - Waiting: the Ethereum side is waiting for cheap gas (see [What's real](#whats-real)).
+  - Tested: the full loop already runs in CI, against real Lido data on a mainnet fork.
+
+The two reactive contracts have the same address on two different networks, Reactive mainnet and Lasna.
+That's because both were the first deployment from the same wallet. Lasna is chain 5318007 and mainnet is chain 1597.
 
 ## For judges: verify in 2 minutes
 
@@ -19,13 +29,16 @@ No wallet, key or `.env` needed. You need [Foundry](https://getfoundry.sh) and p
 
 | Do this | You see |
 |---|---|
-| `./tools/check-live.sh` | PASS / FAIL / WAIT for every onchain claim in this README, read live from Reactive mainnet, Ethereum and Sourcify |
-| `ETHEREUM_RPC_URL=https://ethereum-rpc.publicnode.com forge test` | 22 tests pass. 10 of them run on an Ethereum mainnet fork, against Lido's real queue and a real EIP-7702 delegation (without the variable they're skipped) |
-| `ETHEREUM_RPC_URL=https://ethereum-rpc.publicnode.com forge test --mt test_fullLoop -vvv` | Lido events go into the real `ErrandLido`, and its callback payload claims a real finalized request on Ethereum for exactly the ETH Lido owes |
+| `./tools/check-live.sh` | PASS / FAIL / WAIT for every onchain claim in this README, read live from Reactive mainnet, Lasna, Ethereum, Base Sepolia and Sourcify (today: 19 pass, 0 fail, 2 waiting) |
+| `ETHEREUM_RPC_URL=https://ethereum-rpc.publicnode.com BASE_SEPOLIA_RPC_URL=https://sepolia.base.org forge test` | 41 tests pass. 10 run on an Ethereum mainnet fork against Lido's real queue, and 8 on a Base Sepolia fork against real Morpho Blue, all with real EIP-7702 delegations. Without the RPC variables, the fork tests are skipped |
+| `ETHEREUM_RPC_URL=https://ethereum-rpc.publicnode.com forge test --mt test_fullLoop_reactive -vvv` | Lido events go into the real `ErrandLido`, and its callback payload claims a real finalized request on Ethereum for exactly the ETH Lido owes |
+| [evidence/race-2026-11-24.json](evidence/race-2026-11-24.json) | The Morpho exit, live: 7 rounds of trigger tx → Lasna reactive tx → Base callback tx, with blocks, timestamps, amounts and fees |
 | `cast call 0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651 "tracked()(uint256[])" -r https://mainnet-rpc.rnk.dev/` | The Lido requests the live contract is waiting on for the wallet |
 | `python3 tools/measure-unclaimed.py` | The problem in numbers, measured live (below) |
 
-## The problem
+## Errand 1: claim Lido withdrawals (Set It and Forget It)
+
+### The problem
 
 Lido withdrawals take two transactions: you request, then once Lido finalizes the request you claim.
 Nothing claims for you, so finalized ETH just sits there. On Nov 24, 2026
@@ -39,7 +52,7 @@ Nothing claims for you, so finalized ETH just sits there. On Nov 24, 2026
 Today the fixes are a reminder, a keeper bot that holds your key, or moving your funds into someone
 else's contract. Errand needs none of these: the wallet itself does the claim.
 
-## How it works
+### How it works
 
 ```mermaid
 sequenceDiagram
@@ -76,7 +89,7 @@ sequenceDiagram
    ([`src/ErrandWallet.sol:91`](src/ErrandWallet.sol#L91-L106)). ErrandLido pays its own Reactive fees in
    REACT from its balance.
 
-## Claims (every one checkable today)
+### Claims (every one checkable today)
 
 | Claim | Where in code | Check |
 |---|---|---|
@@ -94,15 +107,109 @@ sequenceDiagram
 | The whole loop works with the real contracts and real Lido state | both contracts | `test_fullLoop_reactiveContractPayloadClaimsOnEthereum` (fork test :173) |
 | ErrandLido is live on Reactive mainnet, verified, funded and debt-free | [deployments/mainnet.json](deployments/mainnet.json) | `./tools/check-live.sh` |
 
+## Errand 2: get out of a fully borrowed Morpho market (Every Second Counts)
+
+### The problem
+
+When every coin in a lending market is lent out, its lenders can't withdraw. Morpho Blue rejects the
+withdrawal with "insufficient liquidity" (`test_theProblem_lenderCannotWithdrawFromAFullyBorrowedMarket`,
+[`test/ErrandMorphoWallet.fork.t.sol:92`](test/ErrandMorphoWallet.fork.t.sol#L92)). Each repayment or new
+deposit frees some liquidity, and the first lender to send a withdrawal gets it. A lender who wants out
+has to keep watching, or run a bot that holds their key.
+
+### How it works
+
+```mermaid
+sequenceDiagram
+    participant W as Lender's wallet (Base Sepolia, EIP-7702)
+    participant M as Morpho Blue market
+    participant R as ErrandMorpho (Reactive Lasna)
+    participant P as Reactive callback proxy (Base Sepolia)
+    W->>W: requestExit()  → ExitRequested
+    W-->>R: ExitRequested  → armed, tries at once
+    M-->>R: Repay / Supply in this market (someone frees liquidity)
+    R->>P: callback: exitMorpho(ErrandMorpho)
+    P->>W: exitMorpho(...)  (wallet checks proxy + sender)
+    W->>M: withdraw what is free (or everything, if it fits)
+    W-->>R: ExitProgress(withdrawn, remainingShares)  → stands down at 0
+```
+
+1. **The lender asks once.** The wallet sends `requestExit()` to itself. Only the wallet can do this,
+   because the delegated code requires `msg.sender == address(this)`
+   ([`src/ErrandMorphoWallet.sol:93`](src/ErrandMorphoWallet.sol#L93)).
+2. **[`ErrandMorpho`](src/ErrandMorpho.sol) subscribes to five events**, all filtered to this one market.
+   Two are Morpho's `Repay` and `Supply`; three are the wallet's `ExitRequested`, `ExitCancelled` and
+   `ExitProgress` ([`src/ErrandMorpho.sol:63`](src/ErrandMorpho.sol#L63-L67)).
+   - `ExitRequested` arms it, and it tries right away.
+   - While armed, every repay or deposit in the market sends an errand. The wallet's own deposits are skipped.
+   - It stands down when `ExitProgress` reports no shares left, or when the wallet cancels
+     ([`src/ErrandMorpho.sol:75`](src/ErrandMorpho.sol#L75-L95)).
+3. **The wallet withdraws what it can.** `exitMorpho` accepts the call only from Reactive's callback
+   proxy, and only when the sender is our ErrandMorpho ([`src/ErrandMorphoWallet.sol:106`](src/ErrandMorphoWallet.sol#L106-L131)).
+   - If its whole position fits in the free liquidity, it withdraws everything.
+   - Otherwise it withdraws exactly what is free.
+   - If nothing is free, it withdraws 0 instead of reverting.
+4. **Fees** are paid in ETH through `pay()`, capped per call, the same way as the Lido errand.
+
+### Latency, measured on Base Sepolia
+
+[tools/race.py](tools/race.py) set up a real Morpho Blue market on Base Sepolia, then ran the full loop live:
+- The wallet lent 100 tUSD, and a borrower borrowed all of it.
+- The wallet asked to exit.
+- The borrower repaid in parts, and someone else deposited.
+
+Every transaction is onchain. Evidence: [evidence/race-2026-11-24.json](evidence/race-2026-11-24.json).
+
+| Trigger | Trigger tx (Base) | Reactive tx (Lasna) | Callback tx (Base) | tUSD out | Timestamp Δ | Base blocks | Wall clock |
+|---|---|---|---|---|---|---|---|
+| requestExit | [0x72bffcf7…](https://base-sepolia.blockscout.com/tx/0x72bffcf77bae7287732af2281b97e6023a218670ad02d2b1962467a1030d477b) | [0xed7146e1…](https://lasna.reactscan.net/tx/0xed7146e13357b8ba5954a508a410041168d0655943c9f4937fb41071589d71a9) | [0xc587602b…](https://base-sepolia.blockscout.com/tx/0xc587602b0c07bcd277c9c514ef95b47299f1dcfcec6c83687d40a24ba2480155) | 0 (nothing free yet) | 1 s | 6 (1.2 s) | 2.67 s |
+| repay 10 | [0x02df3310…](https://base-sepolia.blockscout.com/tx/0x02df331060a1e727429d94a3ac4c545f2ce6865f6ad5c13f41afafdf6e73c69b) | [0x22c12746…](https://lasna.reactscan.net/tx/0x22c127463641ef5c660c25912e2a99748c133bc0ce8c2cd5ba58472773712811) | [0xa71e9fd0…](https://base-sepolia.blockscout.com/tx/0xa71e9fd069d2554ee539e42ddb01800c8e056c81a4ccf9b147349abbfeeefcf5) | 10 | 1 s | 3 (0.6 s) | 1.79 s |
+| repay 15 | [0x63913582…](https://base-sepolia.blockscout.com/tx/0x63913582a2e3babb00b240b9eb5bac091d00f2778605fb235d08933947ed0b4e) | [0xd288223a…](https://lasna.reactscan.net/tx/0xd288223ac983c47bdc09e87f2a44f933f84502e4ed089911e563a9887ea6b8c0) | [0x8408413e…](https://base-sepolia.blockscout.com/tx/0x8408413e300f446abbddb69e04f7929131ed23d15057c1b39345531f9f25dfe6) | 15 | 1 s | 3 (0.6 s) | 2.35 s |
+| repay 20 | [0xe613bab5…](https://base-sepolia.blockscout.com/tx/0xe613bab578062e9cbbdec32d386668a605c91ba415d76fff771a6c15f6dd3e1d) | [0x0fceae49…](https://lasna.reactscan.net/tx/0x0fceae490d723f60c09098602f42e8a0b1c4c93b9a677e1e8d7f484908968a16) | [0x00acbc65…](https://base-sepolia.blockscout.com/tx/0x00acbc65beea1d8569d707194c1cb73b92ee9ddb3859d747b79fd3d81858b312) | 20 | 1 s | 5 (1.0 s) | 2.17 s |
+| repay 25 | [0x8028164d…](https://base-sepolia.blockscout.com/tx/0x8028164dee4309ec76c7bdd69c5df5a26871e9735c22f6dd8b5ac1349bae4bb8) | [0x44fb77a3…](https://lasna.reactscan.net/tx/0x44fb77a307984ec361da01dda626681fcef76c8fa58afcf94880a979599ae888) | [0x492b21ec…](https://base-sepolia.blockscout.com/tx/0x492b21ecaf1e1661ed3054bbd195900661004b62815ed7d9a30ba672271ccbca) | 25 | 1 s | 3 (0.6 s) | 2.70 s |
+| deposit 10 (another lender) | [0x6beffb13…](https://base-sepolia.blockscout.com/tx/0x6beffb132114d2c6c49a091a101435503ff73c98c159b4ea8444db58b9f1b492) | [0x3b457217…](https://lasna.reactscan.net/tx/0x3b45721798e7ca849d5ce22b2c1ed7e6781e8176455f63e6ffb3a8eb834d34de) | [0x54f0bcc8…](https://base-sepolia.blockscout.com/tx/0x54f0bcc8f4f98737aa3d23d94e5da86db8375b90d3e6e2bf33ae2aabfedf6770) | 10 | 1 s | 6 (1.2 s) | 2.36 s |
+| repay rest | [0x7e760c45…](https://base-sepolia.blockscout.com/tx/0x7e760c453b31325e430f5e938bb462b691a4906f030c00c55bbf9abbd8997262) | [0x7fe2c770…](https://lasna.reactscan.net/tx/0x7fe2c770033386be8ade5c1ba8ce3b558157e31f1700e82a43473821aa5c00cb) | [0xdcb45497…](https://base-sepolia.blockscout.com/tx/0xdcb454971c5215e04d576be777ae40cff19db41da2080b618707ab64d1b9ed89) | 20 (all out) | 1 s | 5 (1.0 s) | 2.63 s |
+
+How to read the columns:
+- **Timestamp Δ** is the callback block's timestamp minus the trigger block's, as the event rules ask
+  for on Base Sepolia. Timestamps have 1-second resolution, and the callback landed one timestamp second
+  later every time.
+- **Base blocks** is the finer measure. Base Sepolia makes a block every 0.2 s (1,000 blocks in 200 s
+  when measured). Across the 6 withdrawals it was 3–6 blocks, median 5: **0.6–1.2 s**.
+- **Wall clock** is what [tools/race.py](tools/race.py) saw, from seeing the trigger's receipt to seeing
+  the callback's event. It polls a public RPC every 0.4 s, so it adds RPC delay: 1.8–2.7 s.
+
+After the last repay, the wallet held no shares, and ErrandMorpho switched itself off
+([disarm tx](https://lasna.reactscan.net/tx/0xcda3ebb2283799e80c429a78d9b73605c3dcc940199a4c50db50e3e3efa21675),
+`armed() == false`). Each callback cost the wallet about 0.000001 ETH in Reactive fees and about 123k gas.
+
+**Why this needs Omni:** the lender's own address withdraws within about a second of the event that
+freed the money. No bot holds the lender's key, and no server polls Morpho. A lender doing this by hand
+competes with every other lender in the market. A keeper would need the key or a vault.
+
+### Claims (Morpho exit)
+
+| Claim | Where in code | Check |
+|---|---|---|
+| A fully borrowed market rejects withdrawals (the problem is real) | Morpho Blue | `test_theProblem_lenderCannotWithdrawFromAFullyBorrowedMarket` ([`test/ErrandMorphoWallet.fork.t.sol:92`](test/ErrandMorphoWallet.fork.t.sol#L92)) |
+| A partial repay is withdrawn exactly, and the rest stays in the market | [`src/ErrandMorphoWallet.sol:119`](src/ErrandMorphoWallet.sol#L119-L127) | `test_errandTakesWhatARepayFreedAndKeepsTheRestIn` (:103), live rounds above |
+| With nothing free, the errand withdraws 0 instead of reverting | [`src/ErrandMorphoWallet.sol:123`](src/ErrandMorphoWallet.sol#L123) | `test_nothingFreeMeansAnEmptyAttemptNotARevert` (:128), live round `requestExit` |
+| Only the proxy, and only our ErrandMorpho, can make the wallet withdraw | [`src/ErrandMorphoWallet.sol:106`](src/ErrandMorphoWallet.sol#L106-L107) | `test_onlyTheProxyAndOnlyOurErrand` (:134) |
+| Only the wallet can start or cancel an exit | [`src/ErrandMorphoWallet.sol:93`](src/ErrandMorphoWallet.sol#L93-L101) | `test_onlyTheWalletCanAskToExit` (:145) |
+| Every repay or deposit while armed sends an errand; the wallet's own deposit doesn't | [`src/ErrandMorpho.sol:78`](src/ErrandMorpho.sol#L78-L82) | `test_everyRepayOrSupplyWhileArmedSendsAnErrand`, `test_theWalletsOwnSupplyIsNotLiquidity` |
+| Errand stands down when the wallet is fully out | [`src/ErrandMorpho.sol:90`](src/ErrandMorpho.sol#L90-L92) | `test_partialProgressStaysArmedAndFullExitDisarms`, live: `./tools/check-live.sh` |
+| The whole loop works with real Morpho events | both contracts | `test_fullLoop_realMorphoEventsDriveTheExit` (:160), and live on testnet |
+
 ## Judging criteria
 
 | Criterion (quoted from the event page) | Where we meet it |
 |---|---|
-| **Execution:** "Does it run? We want to see the reactive transactions and the callbacks they trigger on-chain." | ErrandLido is live on Reactive mainnet ([What's real](#whats-real)). The Ethereum side and the first real claim are pending, as listed there. The full loop runs in CI on a mainnet fork |
-| **Integration:** "Does the reactive contract do real work, or is it bolted on?" | All tracking, timing and batching happens in `react()` ([`src/ErrandLido.sol:72`](src/ErrandLido.sol#L72-L94)). Without it, nothing knows when to claim |
-| **Usefulness:** "Does it solve a problem real users have?" | 37,306 ETH is finalized but unclaimed in Lido's queue right now ([The problem](#the-problem)) |
-| **Craft:** "Readable code, a working demo, and documentation someone else could follow." | Two small contracts, 22 tests, a [Claims](#claims-every-one-checkable-today) table with file:line for each claim, and `./tools/check-live.sh` |
+| **Execution:** "Does it run? We want to see the reactive transactions and the callbacks they trigger on-chain." | Morpho exit: 7 full loops onchain, each with the trigger tx, Lasna reactive tx and Base callback tx linked in the [latency table](#latency-measured-on-base-sepolia). Lido claim: ErrandLido is live on Reactive mainnet. Its Ethereum side and first real claim are pending ([What's real](#whats-real)) |
+| **Integration:** "Does the reactive contract do real work, or is it bolted on?" | The reactive contracts hold the state and decide when to act. ErrandLido tracks the wallet's requests, waits for finalization and batches the claims ([`src/ErrandLido.sol:72`](src/ErrandLido.sol#L72-L94)). ErrandMorpho arms on request, fires on every repay or deposit, and stands down when the wallet is out ([`src/ErrandMorpho.sol:75`](src/ErrandMorpho.sol#L75-L95)). Without them, nothing knows when to act |
+| **Usefulness:** "Does it solve a problem real users have?" | 37,306 ETH is finalized but unclaimed in Lido's queue right now ([measured](#the-problem)). Lenders in a fully borrowed market can't withdraw until someone repays, and then they race for it |
+| **Craft:** "Readable code, a working demo, and documentation someone else could follow." | Four small contracts, 41 tests (18 on mainnet and Base Sepolia forks), claims tables with file:line, `./tools/check-live.sh` (19 PASS) and the race evidence file |
 | **Set It and Forget It:** "a tool you'd actually keep running", "a clear personal purpose" | Turn it on once. After that, each Lido withdrawal the wallet makes is claimed without the owner |
+| **Every Second Counts:** "withdrawal queues that settle the moment they can", "latency numbers for the full loop" | The lender's withdrawal lands 3–6 Base blocks (0.6–1.2 s) after each repay, with timestamps and tx links for all 7 rounds ([latency](#latency-measured-on-base-sepolia)) |
 
 ## What's real
 
@@ -112,9 +219,14 @@ sequenceDiagram
 | `ErrandWallet` + 7702 delegation on Ethereum | **waiting for cheap gas** | The project wallet has 0.00049 ETH. [script/when-gas-is-cheap.sh](script/when-gas-is-cheap.sh) deploys when the base fee is ≤ 0.12 gwei. A rehearsal on a mainnet fork with that exact balance passed |
 | A real Lido request claimed by Errand on mainnet | **not yet** | It follows the step above, after Lido finalizes the request (Lido finalizes about once a day) |
 | Full loop on a mainnet fork | real Lido queue, real 7702 delegation, simulated delivery | The fork test calls the wallet as the proxy, with the payload ErrandLido produced. Reactive's sender injection is reproduced in [`test/ErrandWallet.fork.t.sol:207`](test/ErrandWallet.fork.t.sol#L207-L211) |
+| `ErrandMorpho` | **live on Lasna testnet**, source verified | [0x6fBf…6651 on Lasna](https://lasna.reactscan.net/address/0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651) · [deploy tx](https://lasna.reactscan.net/tx/0xac1ae838e16484f14f66c3a1f5489c4750d16b84e2ede146031671695127957b) · [Sourcify](https://repo.sourcify.dev/5318007/0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651) |
+| `ErrandMorphoWallet` + 7702 delegation on Base Sepolia | **live** | [code](https://base-sepolia.blockscout.com/address/0x0D671866021CE29099F9aEc9bfF2d93D6C155CBe) · [delegation tx](https://base-sepolia.blockscout.com/tx/0xe871ea1446af4546c39cc31ac37887c196caa8f316f023582780852ced597dba) |
+| Morpho exit, full loop | **ran 7 times on testnet**, real Reactive delivery | [latency table](#latency-measured-on-base-sepolia), [evidence/race-2026-11-24.json](evidence/race-2026-11-24.json) |
+| Morpho Blue | **real** Base Sepolia deployment `0xBBBB…FFCb` | [market creation tx](https://base-sepolia.blockscout.com/tx/0xb11ab528f76caf74a6ad2f99a037bbd42fe5a35a2c1cf2b8072f2468af4239bf) |
+| tUSD, tETH and the price oracle | **testnet stand-ins we deployed**: open-mint tokens and a fixed 1:1 price | [src/testnet/](src/testnet/), marked testnet-only in the source. Morpho markets are permissionless, so the market is a real one built on them |
 | Reactive's system contract in unit tests | simulated: a mock records subscriptions and callbacks | [test/mocks/MockSystem.sol](test/mocks/MockSystem.sol) |
 
-This table and `deployments/mainnet.json` get the Ethereum addresses and the claim transaction as soon as they exist.
+All addresses are in [deployments/mainnet.json](deployments/mainnet.json) and [deployments/testnet.json](deployments/testnet.json). The mainnet table and file get the Ethereum addresses and the claim transaction as soon as they exist.
 
 ## Why this needs Reactive Network
 
@@ -125,7 +237,10 @@ the trigger, and its callback proxy carries an authenticated sender. That second
 step 5 safe: the wallet can tell its own ErrandLido from anyone else. EIP-7702 makes the user's
 wallet a valid callback destination, so no vault or escrow is needed.
 
-Reactive pieces used: `AbstractReactive` and the system contract's `subscribe` (3 filters with
+The Morpho errand has the same shape on Base Sepolia, with a time limit added: freed liquidity goes to
+whichever lender withdraws first, so the callback has to land within seconds, from the lender's own address.
+
+Reactive pieces used: `AbstractReactive` and the system contract's `subscribe` (3 + 5 filters with
 `REACTIVE_IGNORE` wildcards), `requestCallbackV_1_0` with per-batch gas, sender injection, `IPayer.pay`
 for destination fees, and REACT funding and debt on the reactive side.
 
@@ -134,7 +249,9 @@ for destination fees, and REACT funding and debt on the reactive side.
 - **Keys:** the user's key stays the only key. Signing a new 7702 authorization (to `address(0)` or
   other code) undoes Errand at any time. ErrandLido's owner is the wallet itself, and owner actions only
   add requests to track, retry a claim, or withdraw the contract's REACT
-  ([`src/ErrandLido.sol:102`](src/ErrandLido.sol#L102-L121)).
+  ([`src/ErrandLido.sol:102`](src/ErrandLido.sol#L102-L121)). ErrandMorpho's owner is whoever deployed it (the
+  wallet, in our deployment). Its only owner action is withdrawing the contract's own REACT
+  ([`src/ErrandMorpho.sol:103`](src/ErrandMorpho.sol#L103-L105)); `coverDebt()` is open to anyone, since it only pays Reactive.
 - **Trusted:** Reactive Network delivers real Ethereum logs to `react()` and injects the true requesting
   contract into callbacks. If Reactive misbehaved, the worst a forged call could do is claim the wallet's
   own finalized Lido requests to the wallet, and collect fees from the wallet's ETH, at most the cap on each payment.
@@ -143,6 +260,9 @@ for destination fees, and REACT funding and debt on the reactive side.
 - **Wallet support:** the user must sign a 7702 authorization for this code. Today that works with a
   key you control (e.g. Foundry's `cast`). Browser wallets such as MetaMask only delegate to their own
   contracts, so their users can't run Errand yet.
+- **Morpho exit:** the reactive contract can only make the wallet withdraw its own position in the one
+  market it names, to itself. A forged errand could only withdraw early, which is what the lender asked
+  for. Several lenders running Errand on one market would race each other, and the first callback wins.
 - **Batching:** one callback claims at most 20 requests. Any more wait for the next finalization.
 - **Cost:** each claim costs Ethereum gas plus Reactive's fee. For a very small request, the fee can
   be close to the amount claimed. The mainnet test request is deliberately tiny.
@@ -152,14 +272,15 @@ for destination fees, and REACT funding and debt on the reactive side.
 - A setup page, so people can turn Errand on without the command line. Setup is scripts today.
 - A measured delay from finalization to claim on mainnet. That needs the first real claim.
 - Other two-step withdrawals with the same shape (EigenLayer, Ethena cooldowns, Reactive's own staking).
-- An entry for Every Second Counts (a testnet withdrawal queue with measured latency).
+- The Morpho exit on mainnet. Morpho Blue is on Base mainnet, and the same code works there with a real market.
+- More than one market per wallet for the Morpho exit. Today, one wallet's code names one market.
 
 ## Run it
 
 ```bash
 git clone --recursive https://github.com/neromtoobad/errand && cd errand
-forge test                                   # unit tests; fork tests run when ETHEREUM_RPC_URL is set
-ETHEREUM_RPC_URL=https://ethereum-rpc.publicnode.com forge test
+forge test                                   # unit tests; fork tests run when their RPC URLs are set
+ETHEREUM_RPC_URL=https://ethereum-rpc.publicnode.com BASE_SEPOLIA_RPC_URL=https://sepolia.base.org forge test
 ```
 
 To set up Errand for your own wallet (needs REACT on Reactive and a little ETH on Ethereum):
@@ -168,6 +289,14 @@ To set up Errand for your own wallet (needs REACT on Reactive and a little ETH o
 cp .env.example .env                         # your wallet's address and key
 ./script/deploy-reactive.sh                  # ErrandLido on Reactive Network (REACT only)
 ./script/deploy-ethereum.sh                  # ErrandWallet + 7702 delegation (or: ./script/when-gas-is-cheap.sh)
+```
+
+To rerun the Morpho exit on testnets (needs about 0.02 Base Sepolia ETH; 0.015 of it becomes lREACT at
+Reactive's faucet `0x2afaFD298b23b62760711756088F75B7409f5967`):
+
+```bash
+./script/testnet/deploy-morpho.sh            # tokens, market, ErrandMorpho on Lasna, 7702 wallet, lend + borrow
+python3 tools/race.py                        # exit request, repays and a deposit, timed; writes evidence/
 ```
 
 ## Built at the event
