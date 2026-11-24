@@ -9,7 +9,8 @@ POLL=${POLL:-60}
 MARGIN=${MARGIN:-0.00005ether}   # kept back in the wallet toward the claim's callback fee
 
 while :; do
-  BASE=$(cast base-fee -r "$ETH_RPC")
+  # A failed RPC read is not a reason to stop waiting: log it and try again next poll.
+  BASE=$(cast base-fee -r "$ETH_RPC" 2>/dev/null) || { echo "$(date -u +%FT%TZ) RPC read failed, retrying"; sleep "$POLL"; continue; }
   GWEI=$(python3 -c "print(f'{$BASE/1e9:.3f}')")
   python3 -c "import sys; sys.exit(0 if $BASE <= $MAX_BASE_GWEI*1e9 else 1)" && break
   echo "$(date -u +%FT%TZ) base fee $GWEI gwei > $MAX_BASE_GWEI, waiting"
