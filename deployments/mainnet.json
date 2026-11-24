@@ -1,0 +1,9 @@
+{
+  "wallet": "0x529d216723506E3390c9c6832b86fd78A805d4EC",
+  "reactive": {
+    "chainId": 1597,
+    "ErrandLido": "0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651",
+    "deployTx": "0xbde3b9c8503df076eb9f883ac82b19314ab772f650d997a76c524308d5905c6b",
+    "lastFinalizedAtSetup": 142469
+  }
+}
