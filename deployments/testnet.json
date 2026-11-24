@@ -1,0 +1,24 @@
+{
+  "wallet": "0x529d216723506E3390c9c6832b86fd78A805d4EC",
+  "borrower": "0xF40a9e19d97A65e56C5B5576bD4D32683a6F73B0",
+  "base": {
+    "chainId": 84532,
+    "morpho": "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb",
+    "callbackProxy": "0x476F44b11F5C942c58f4c8E3d0300E5710743585",
+    "loanToken": "0x56A78e099A9DE04cD5BBd96E0Fb65D0708841e3A",
+    "collateralToken": "0x08e2A31B676214E306F78aF5Ad1Aa3883eDe9f05",
+    "oracle": "0x67B6f376f276201B0A1bBDf641Be1e1A89E2D900",
+    "marketId": "0x25b0c2366d5b1d87709a90e687f71b4fde90cca9fb9cf606014dca08c8585201",
+    "createMarketTx": "0xb11ab528f76caf74a6ad2f99a037bbd42fe5a35a2c1cf2b8072f2468af4239bf",
+    "ErrandMorphoWallet": "0x0D671866021CE29099F9aEc9bfF2d93D6C155CBe",
+    "walletCodeTx": "0x373de1305cc685c2d81718343cabe9fa847c918150ad92c6488459344db929d4",
+    "delegationTx": "0xe871ea1446af4546c39cc31ac37887c196caa8f316f023582780852ced597dba",
+    "supplyTx": "0x72b836b03a5e20c328aad1b8d985861a9ce02aaaef6252c09d5972c091f264f7",
+    "borrowTx": "0x85752e5a4117ff24693984cbb0a01f77998c9e620b9af37115064c1cd4f9e1aa"
+  },
+  "reactive": {
+    "chainId": 5318007,
+    "ErrandMorpho": "0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651",
+    "deployTx": "0xac1ae838e16484f14f66c3a1f5489c4750d16b84e2ede146031671695127957b"
+  }
+}
