@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Errand: your wallet withdraws the moment money frees up</title>
+  <meta name="description" content="A lender's money is stuck in a fully borrowed Morpho market. Free some liquidity and time how fast their own wallet takes it back, through Reactive Network and EIP-7702. Live on testnet." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23121211'/%3E%3Cpath d='M9 21c3-9 11-9 14 0' stroke='%23d4f25a' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='9' cy='21' r='2.6' fill='%23fff'/%3E%3Ccircle cx='23' cy='21' r='2.6' fill='%23d4f25a'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="#">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" /><path d="M9 21c3-9 11-9 14 0" /><circle cx="9" cy="21" r="2.6" class="a" /><circle cx="23" cy="21" r="2.6" class="b" /></svg>
+      Errand
+    </a>
+    <nav>
+      <a href="#rounds">Rounds</a>
+      <a href="#how">How it works</a>
+      <a href="https://github.com/neromtoobad/errand" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <button id="connect" class="btn btn-line">Connect wallet</button>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="dot live"></span>Live on Base Sepolia and Reactive Lasna · testnet</p>
+        <h1>Your wallet withdraws the moment money frees&nbsp;up.</h1>
+        <p class="lede">Every coin in this Morpho market is borrowed, so its lender can't withdraw. They asked once.
+          Now each time someone repays or deposits, Errand has the lender's own wallet take back what was freed.
+          No bot, no server, no key handed over.</p>
+
+        <div class="lender card">
+          <div class="lender-head">
+            <div>
+              <p class="label">Lender's wallet</p>
+              <a id="lender-addr" class="mono addr" target="_blank" rel="noopener"></a>
+            </div>
+            <p id="errand-status" class="pill">Reading…</p>
+          </div>
+          <div class="lender-nums">
+            <div>
+              <p class="label">Still stuck in the market</p>
+              <p class="big"><span id="stuck">—</span> <span class="unit">tUSD</span></p>
+            </div>
+            <div>
+              <p class="label">Taken back by Errand</p>
+              <p class="big muted-big"><span id="out">—</span> <span class="unit">tUSD</span></p>
+            </div>
+          </div>
+          <div class="bar" aria-hidden="true"><span id="bar-out"></span></div>
+          <dl class="facts">
+            <div><dt>Market borrowed</dt><dd id="util">—</dd></div>
+            <div><dt>Errands sent</dt><dd id="errands">—</dd></div>
+            <div><dt>REACT left for fees</dt><dd id="react">—</dd></div>
+          </dl>
+        </div>
+      </div>
+
+      <div class="board" id="board">
+        <div class="board-head">
+          <p class="board-title">Free some liquidity and time it</p>
+          <p class="board-sub">You deposit test tUSD into the market. Errand sees it and the lender's wallet withdraws it.</p>
+        </div>
+
+        <div class="amounts" role="radiogroup" aria-label="Amount to deposit">
+          <button class="chip" data-amt="5">5</button>
+          <button class="chip on" data-amt="10">10</button>
+          <button class="chip" data-amt="25">25</button>
+          <button class="chip" data-amt="50">50</button>
+          <span class="chip-unit">tUSD</span>
+        </div>
+
+        <button id="go" class="btn btn-go">Connect wallet to deposit</button>
+        <p id="go-note" class="go-note">One transaction on Base Sepolia. The tUSD is minted for you and has no value.</p>
+
+        <div class="clock">
+          <p id="clock" class="clock-num">0.00<span>s</span></p>
+          <p id="clock-label" class="clock-label">from your deposit landing to the lender's withdrawal</p>
+        </div>
+
+        <ol class="splits">
+          <li id="s1"><span class="n">1</span><div><p class="s-t">Your deposit lands</p><p class="s-c">Base Sepolia</p></div><p class="s-r"></p></li>
+          <li id="s2"><span class="n">2</span><div><p class="s-t">Errand reacts</p><p class="s-c">Reactive Lasna</p></div><p class="s-r"></p></li>
+          <li id="s3"><span class="n">3</span><div><p class="s-t">Lender's wallet withdraws</p><p class="s-c">Base Sepolia</p></div><p class="s-r"></p></li>
+        </ol>
+        <p id="result" class="result" hidden></p>
+      </div>
+    </section>
+
+    <section id="rounds" class="section">
+      <div class="section-head">
+        <h2>Every round so far</h2>
+        <p id="rounds-sum" class="section-sub">Reading Lasna and Base Sepolia…</p>
+      </div>
+      <div class="table-wrap card">
+        <table class="rounds">
+          <thead>
+            <tr><th>#</th><th>What freed money</th><th>Trigger</th><th>Errand on Lasna</th><th>Withdrawal</th><th class="r">Taken back</th><th class="r">Time onchain</th></tr>
+          </thead>
+          <tbody id="rounds-body"><tr><td colspan="7" class="empty">Loading rounds…</td></tr></tbody>
+        </table>
+      </div>
+      <p class="fine">Time onchain counts Base Sepolia blocks between the trigger and the withdrawal, at 0.2 s per block. Block timestamps only have whole seconds; the raw numbers are in the <a href="https://github.com/neromtoobad/errand/tree/main/evidence" target="_blank" rel="noopener">evidence files</a>.</p>
+    </section>
+
+    <section id="how" class="section">
+      <div class="section-head">
+        <h2>How it works</h2>
+        <p class="section-sub">Two small contracts and one signature from the lender.</p>
+      </div>
+      <div class="steps">
+        <article class="card step">
+          <p class="step-n">1</p>
+          <h3>The wallet gets Errand's code</h3>
+          <p>The lender signs one EIP-7702 authorization. Their address, key and balance stay the same; the wallet can now take calls from Reactive's callback proxy, and only from their own Errand.</p>
+        </article>
+        <article class="card step">
+          <p class="step-n">2</p>
+          <h3>They ask to exit, once</h3>
+          <p>The wallet calls <code>requestExit()</code> on itself. ErrandMorpho on Reactive Network sees it and starts watching this market's repays and deposits.</p>
+        </article>
+        <article class="card step">
+          <p class="step-n">3</p>
+          <h3>Every freed coin goes home</h3>
+          <p>On each repay or deposit, ErrandMorpho sends a callback. The wallet withdraws whatever is free, and Errand stands down when nothing is left in the market.</p>
+        </article>
+      </div>
+      <div class="why card">
+        <h3>Why not a bot?</h3>
+        <p>A bot that withdraws for you needs your key or your funds in its vault. Here the event itself is the trigger and the withdrawal comes from the lender's own address. Reactive's callback proxy tells the wallet which contract sent the request, so the wallet obeys only its own Errand.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Also built: Lido claims on mainnet</h2>
+        <p class="section-sub">The same wallet claims its own finalized Lido withdrawals on Ethereum.</p>
+      </div>
+      <div class="lido card">
+        <div class="lido-row"><span class="dot" id="lido-dot1"></span><p><strong>ErrandLido</strong> live on Reactive mainnet, source verified</p><a id="lido-r" target="_blank" rel="noopener">Reactscan</a></div>
+        <div class="lido-row"><span class="dot" id="lido-dot2"></span><p id="lido-eth">Reading Ethereum…</p></div>
+        <div class="lido-row"><span class="dot" id="lido-dot3"></span><p id="lido-claim">—</p></div>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <div>
+        <p class="brand small">Errand</p>
+        <p>Built at the Reactive Omni Buildathon, Nov 2026.</p>
+      </div>
+      <div class="foot-links" id="foot-links"></div>
+      <p class="fine">Testnet only: tUSD, tETH and the price feed are test stand-ins we deployed, and your deposit stays in the market. Morpho Blue and Reactive Network are the real testnet deployments.</p>
+    </footer>
+  </main>
+
+  <div id="toast" class="toast" hidden></div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
