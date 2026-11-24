@@ -10,6 +10,7 @@ import {ErrandMorpho} from "../src/ErrandMorpho.sol";
 import {IMorpho, MarketParams} from "../src/interfaces/IMorpho.sol";
 import {TestToken} from "../src/testnet/TestToken.sol";
 import {FixedPriceOracle} from "../src/testnet/FixedPriceOracle.sol";
+import {DemoDeposit} from "../src/testnet/DemoDeposit.sol";
 import {MockSystem} from "./mocks/MockSystem.sol";
 
 /// @notice Runs against a fork of Base Sepolia: the real Morpho Blue contract, a market we create on it,
@@ -219,5 +220,32 @@ contract ErrandMorphoWalletMorphoForkTest is Test {
         vm.prank(PROXY);
         (bool delivered,) = lender.call{gas: cb.gasLimit}(payload);
         assertTrue(delivered);
+    }
+
+    /// @notice The demo page's one-click deposit: a visitor's deposit is a Supply on their behalf,
+    /// which frees liquidity that the errand then withdraws for the lender.
+    function test_demoDepositFreesLiquidityTheErrandTakes() public onlyForked {
+        DemoDeposit demo = new DemoDeposit(MORPHO, params);
+        address visitor = makeAddr("visitor");
+        vm.recordLogs();
+        vm.prank(visitor);
+        demo.deposit(10 ether);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        bytes32 supplyTopic = keccak256("Supply(bytes32,address,address,uint256,uint256)");
+        Vm.Log memory supply;
+        for (uint256 i; i < logs.length; ++i) {
+            if (logs[i].emitter == address(MORPHO) && logs[i].topics[0] == supplyTopic) supply = logs[i];
+        }
+        assertEq(supply.emitter, address(MORPHO), "Morpho emitted a Supply");
+        assertEq(supply.topics[1], marketId);
+        assertEq(supply.topics[3], bytes32(uint256(uint160(visitor))), "the deposit is on the visitor's behalf");
+        (uint256 visitorShares,,) = MORPHO.position(marketId, visitor);
+        assertGt(visitorShares, 0);
+
+        _exit();
+        assertEq(loan.balanceOf(lender), 10 ether, "the lender got out exactly what the visitor freed");
+
+        vm.expectRevert(abi.encodeWithSelector(DemoDeposit.AmountOutOfRange.selector, 51 ether));
+        demo.deposit(51 ether);
     }
 }
