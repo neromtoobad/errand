@@ -11,6 +11,8 @@ Two errands are built:
 2. **[Morpho exit](#errand-2-get-out-of-a-fully-borrowed-morpho-market-every-second-counts)** (Base Sepolia): gets you out of a 100%-borrowed lending market, one repayment at a time.
    [Measured](#latency-measured-on-base-sepolia): each withdrawal lands **0.6–1.2 s** after the repayment that made it possible.
 
+**Try it live: [errand.nerom.site](https://errand.nerom.site).** A lender's money is stuck in a fully borrowed market. Deposit some test tUSD with one transaction, and time how fast their wallet takes it back. The page reads every number from the chains.
+
 **Built at:** [Reactive Omni Buildathon](https://dorahacks.io/hackathon/reactive-omni-buildathon/detail), Nov 5 – Dec 5, 2026 · **Tracks:** Set It and Forget It (Lido), Every Second Counts (Morpho) · **Video:** not recorded yet
 
 **Proof so far:**
@@ -32,6 +34,7 @@ No wallet, key or `.env` needed. You need [Foundry](https://getfoundry.sh) and p
 | `./tools/check-live.sh` | PASS / FAIL / WAIT for every onchain claim in this README, read live from Reactive mainnet, Lasna, Ethereum, Base Sepolia and Sourcify (today: 19 pass, 0 fail, 2 waiting) |
 | `ETHEREUM_RPC_URL=https://ethereum-rpc.publicnode.com BASE_SEPOLIA_RPC_URL=https://sepolia.base.org forge test` | 41 tests pass. 10 run on an Ethereum mainnet fork against Lido's real queue, and 8 on a Base Sepolia fork against real Morpho Blue, all with real EIP-7702 delegations. Without the RPC variables, the fork tests are skipped |
 | `ETHEREUM_RPC_URL=https://ethereum-rpc.publicnode.com forge test --mt test_fullLoop_reactive -vvv` | Lido events go into the real `ErrandLido`, and its callback payload claims a real finalized request on Ethereum for exactly the ETH Lido owes |
+| [errand.nerom.site](https://errand.nerom.site) | The lender's live position, Errand's status, and every round read from Lasna and Base Sepolia. With a browser wallet and a little Base Sepolia ETH you can run a round yourself |
 | [evidence/race-2026-11-24.json](evidence/race-2026-11-24.json) | The Morpho exit, live: 7 rounds of trigger tx → Lasna reactive tx → Base callback tx, with blocks, timestamps, amounts and fees |
 | `cast call 0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651 "tracked()(uint256[])" -r https://mainnet-rpc.rnk.dev/` | The Lido requests the live contract is waiting on for the wallet |
 | `python3 tools/measure-unclaimed.py` | The problem in numbers, measured live (below) |
@@ -269,7 +272,7 @@ for destination fees, and REACT funding and debt on the reactive side.
 
 ## Not built yet
 
-- A setup page, so people can turn Errand on without the command line. Setup is scripts today.
+- A setup page, so people can turn Errand on for their own wallet without the command line. Setup is scripts today: browser wallets won't sign an EIP-7702 delegation to outside code yet. The [live page](https://errand.nerom.site) demos the Morpho exit with our demo lender.
 - A measured delay from finalization to claim on mainnet. That needs the first real claim.
 - Other two-step withdrawals with the same shape (EigenLayer, Ethena cooldowns, Reactive's own staking).
 - The Morpho exit on mainnet. Morpho Blue is on Base mainnet, and the same code works there with a real market.
