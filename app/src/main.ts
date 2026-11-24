@@ -30,8 +30,8 @@ async function refreshSnapshot() {
     return;
   }
   const total = snap.lenderStuck + snap.lenderOut;
-  $("stuck").textContent = tusd(snap.lenderStuck);
-  $("out").textContent = tusd(snap.lenderOut);
+  countTo($("stuck"), snap.lenderStuck);
+  countTo($("out"), snap.lenderOut);
   $("bar-out").style.width = total > 0n ? `${Number((snap.lenderOut * 10000n) / total) / 100}%` : "0%";
   $("util").textContent = snap.supplied > 0n ? `${(Number((snap.borrowed * 10000n) / snap.supplied) / 100).toFixed(1)}%` : "—";
   $("errands").textContent = snap.errandsSent.toString();
@@ -86,8 +86,174 @@ function renderRounds(rounds: Round[]) {
   const timed = rounds.filter((r) => r.callback && r.callback.withdrawn > 0n).map((r) => onchainSeconds(r)!).sort((a, b) => a - b);
   if (timed.length) {
     const med = timed[Math.floor(timed.length / 2)];
-    $("rounds-sum").innerHTML = `Median <strong>${med.toFixed(1)} s</strong> from the trigger to the withdrawal, over the last ${timed.length} withdrawals (fastest ${timed[0].toFixed(1)} s).`;
+    $("median").textContent = med.toFixed(1);
+    $("speed-range").textContent = `fastest ${timed[0].toFixed(1)} s · slowest ${timed[timed.length - 1].toFixed(1)} s · ${timed.length} withdrawals`;
+    $("rounds-sum").textContent = `Each bar is one errand: something frees money on Base Sepolia, Errand reacts on Lasna, and the lender's wallet withdraws back on Base Sepolia.`;
   }
+  renderChart(rounds);
+  showLastRound(rounds);
+}
+
+function renderChart(rounds: Round[]) {
+  const done = rounds.filter((r) => r.callback).slice().reverse(); // oldest first
+  if (!done.length) return;
+  const secs = done.map((r) => onchainSeconds(r)!);
+  const top = Math.max(2, Math.ceil(Math.max(...secs) * 2) / 2);
+  document.querySelectorAll<HTMLElement>("#chart .grid span").forEach((g, i) => {
+    const v = top * (1 - i / 4);
+    g.style.setProperty("--y", `${(v / top) * 100}%`);
+    g.querySelector("em")!.textContent = `${v.toFixed(1)} s`;
+  });
+  $("bars").innerHTML = done.map((r, i) => {
+    const s = secs[i];
+    const w = r.trigger.what;
+    const mine = w.by && account && w.by.toLowerCase() === account.toLowerCase();
+    const cls = mine ? "you" : w.kind === "deposit" ? "deposit" : w.kind === "exit request" ? "exit" : "";
+    const blocks = Number(r.callback!.block - r.trigger.block);
+    const title = `Round ${r.n}: ${w.kind}${w.amount !== undefined ? ` ${tusd(w.amount, 0)} tUSD` : ""}, ${blocks} blocks, ${tusd(r.callback!.withdrawn)} tUSD withdrawn`;
+    return `<a class="bar ${cls}" href="${EXPLORER.base}/tx/${r.callback!.tx}" target="_blank" rel="noopener" title="${title}" style="--h:${(s / top) * 100}%;--d:${i * 0.06}s">
+      <i></i><b>${s.toFixed(1)}</b><small>#${r.n}</small></a>`;
+  }).join("");
+}
+
+/* ---------------- the errand route (Base Sepolia → Lasna → Base Sepolia) ---------------- */
+
+const route = (() => {
+  const arc = document.getElementById("arc-base") as unknown as SVGPathElement;
+  const fill = document.getElementById("arc-fill") as unknown as SVGPathElement;
+  const courier = document.getElementById("courier") as unknown as SVGGElement;
+  const stations = [1, 2, 3].map((i) => document.getElementById(`stn${i}`) as unknown as SVGCircleElement);
+  const L = arc.getTotalLength();
+  fill.style.strokeDasharray = `${L}`;
+  let pos = 0;
+  let anim = 0;
+  const place = (p: number) => {
+    pos = p;
+    const pt = arc.getPointAtLength(L * p);
+    courier.setAttribute("transform", `translate(${pt.x} ${pt.y})`);
+    fill.style.strokeDashoffset = `${L * (1 - p)}`;
+  };
+  const light = (n: number) => stations.forEach((s, i) => s.classList.toggle("hit", i < n));
+  const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
+  const linear = (t: number) => t;
+  /** Moves the courier from where it is to `to` over `ms`. */
+  const moveTo = (to: number, ms: number, ease = easeOut, onStep?: (p: number) => void) =>
+    new Promise<void>((done) => {
+      cancelAnimationFrame(anim);
+      const from = pos;
+      const t0 = performance.now();
+      courier.classList.add("moving");
+      const step = () => {
+        const t = Math.min(1, (performance.now() - t0) / ms);
+        place(from + (to - from) * ease(t));
+        onStep?.(pos);
+        if (t < 1) anim = requestAnimationFrame(step);
+        else {
+          courier.classList.remove("moving");
+          done();
+        }
+      };
+      step();
+    });
+  place(0);
+  return { place, light, moveTo, linear, stop: () => cancelAnimationFrame(anim) };
+})();
+
+/* ---------------- idle board: the last real round, and a replay of it ---------------- */
+
+let boardMode: "idle" | "live" | "replay" = "idle";
+let lastRound: Round | undefined;
+
+function fillSplitsFrom(r: Round) {
+  setSplit(1, "done", baseTx(r.trigger.tx));
+  setSplit(2, "done", lasnaTx(r.reactive.tx));
+  setSplit(3, "done", baseTx(r.callback!.tx));
+}
+
+function showLastRound(rounds: Round[]) {
+  const r = rounds.find((x) => x.callback);
+  if (!r) return;
+  lastRound = r;
+  const secs = onchainSeconds(r)!;
+  const blocks = Number(r.callback!.block - r.trigger.block);
+  const btn = $<HTMLButtonElement>("replay");
+  btn.hidden = false;
+  btn.innerHTML = `<strong>Replay round #${r.n}</strong> at real speed: ${secs.toFixed(1)} s, from its block numbers`;
+  if (boardMode !== "idle") return;
+  route.light(3);
+  route.place(1);
+  fillSplitsFrom(r);
+  $("clock").innerHTML = `${secs.toFixed(1)}<span>s</span>`;
+  $("clock-label").textContent = `last round, #${r.n}: ${blocks} Base blocks from ${r.trigger.what.kind} to withdrawal`;
+}
+
+async function replay() {
+  const r = lastRound;
+  if (!r || running || boardMode === "replay") return;
+  boardMode = "replay";
+  const btn = $<HTMLButtonElement>("replay");
+  btn.disabled = true;
+  const secs = onchainSeconds(r)!;
+  const blocks = Number(r.callback!.block - r.trigger.block);
+  resetBoard();
+  $("clock-label").textContent = `replaying round #${r.n} from chain data`;
+  setSplit(1, "done", baseTx(r.trigger.tx));
+  setSplit(2, "wait", "");
+  route.light(1);
+  await route.moveTo(1, secs * 1000, route.linear, (p) => {
+    $("clock").innerHTML = `${(p * secs).toFixed(2)}<span>s</span>`;
+    if (p >= 0.5) {
+      route.light(2);
+      setSplit(2, "done", lasnaTx(r.reactive.tx));
+      if (!$("s3").className) setSplit(3, "wait", "");
+    }
+  });
+  route.light(3);
+  setSplit(3, "done", baseTx(r.callback!.tx));
+  $("clock").innerHTML = `${secs.toFixed(1)}<span>s</span>`;
+  $("clock-label").textContent = `round #${r.n}: ${blocks} Base blocks from ${r.trigger.what.kind} to withdrawal (replay)`;
+  $("board").classList.add("finished");
+  btn.disabled = false;
+  boardMode = "idle";
+}
+
+/* ---------------- motion helpers ---------------- */
+
+const shown = new Map<HTMLElement, bigint>();
+function countTo(el: HTMLElement, to: bigint, ms = 900) {
+  const from = shown.get(el);
+  shown.set(el, to);
+  if (from === undefined || from === to || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    el.textContent = tusd(to);
+    return;
+  }
+  const a = Number(formatUnits(from, 18));
+  const b = Number(formatUnits(to, 18));
+  const t0 = performance.now();
+  const step = () => {
+    const t = Math.min(1, (performance.now() - t0) / ms);
+    const v = a + (b - a) * (1 - Math.pow(1 - t, 3));
+    el.textContent = v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (t < 1) requestAnimationFrame(step);
+  };
+  step();
+}
+
+function reveal() {
+  const io = new IntersectionObserver((es) => es.forEach((e) => {
+    if (e.isIntersecting) {
+      e.target.classList.add("in");
+      io.unobserve(e.target);
+    }
+  }), { threshold: 0.12 });
+  // The hero fades in on load; everything else as it scrolls into view.
+  document.querySelectorAll<HTMLElement>(".hero .rise").forEach((el, i) => {
+    el.style.transitionDelay = `${i * 70}ms`;
+    setTimeout(() => el.classList.add("in"), 30);
+  });
+  document.querySelectorAll(".rise:not(.hero .rise), #chart").forEach((el) => io.observe(el));
+  const top = document.querySelector(".top")!;
+  addEventListener("scroll", () => top.classList.toggle("scrolled", scrollY > 8), { passive: true });
 }
 
 let roundsBusy = false;
@@ -204,6 +370,9 @@ function setSplit(i: number, state: "" | "wait" | "done", right = "") {
 }
 
 function resetBoard() {
+  route.stop();
+  route.place(0);
+  route.light(0);
   for (const i of [1, 2, 3]) setSplit(i, "");
   $("clock").innerHTML = `0.00<span>s</span>`;
   $("clock-label").textContent = "from your deposit landing to the lender's withdrawal";
@@ -216,7 +385,9 @@ async function deposit() {
   if (running) return;
   const go = $<HTMLButtonElement>("go");
   running = true;
+  boardMode = "live";
   go.disabled = true;
+  $<HTMLButtonElement>("replay").disabled = true;
   resetBoard();
   let hash: Hash;
   try {
@@ -229,6 +400,8 @@ async function deposit() {
     });
   } catch (e) {
     running = false;
+    boardMode = "idle";
+    $<HTMLButtonElement>("replay").disabled = false;
     resetBoard();
     updateGo();
     const reason = e instanceof BaseError ? e.walk((x) => x instanceof ContractFunctionRevertedError) : undefined;
@@ -248,11 +421,17 @@ async function deposit() {
         startClock(t0);
         setSplit(1, "done", `${baseTx(ev.tx)} <span class="dim">block ${ev.block}</span>`);
         setSplit(2, "wait", "waiting");
+        route.light(1);
+        route.moveTo(0.42, 1800);
       } else if (ev.stage === "reacted") {
         setSplit(2, "done", `${ev.tx === "0x" ? "" : lasnaTx(ev.tx)} <span class="dim">+${((ev.at - t0) / 1000).toFixed(2)} s</span>`);
         setSplit(3, "wait", "waiting");
+        route.light(2);
+        route.moveTo(0.5, 120).then(() => { if (running) route.moveTo(0.92, 1800); });
       } else if (ev.stage === "withdrawn") {
         stopClock();
+        route.light(3);
+        route.moveTo(1, 220);
         const secs = Number(ev.blocks) * 0.2;
         setSplit(3, "done", `${baseTx(ev.tx)} <span class="dim">block ${ev.block}</span>`);
         $("clock").innerHTML = `${secs.toFixed(1)}<span>s</span>`;
@@ -270,6 +449,7 @@ async function deposit() {
     clearTimeout(timeout);
     stopClock();
     running = false;
+    $<HTMLButtonElement>("replay").disabled = false;
     updateGo();
     refreshSnapshot();
     refreshVisitor();
@@ -313,6 +493,8 @@ function init() {
 
   $("connect").addEventListener("click", connect);
   $("go").addEventListener("click", deposit);
+  $("replay").addEventListener("click", replay);
+  reveal();
   document.querySelectorAll<HTMLButtonElement>(".chip").forEach((c) =>
     c.addEventListener("click", () => {
       if (running) return;
