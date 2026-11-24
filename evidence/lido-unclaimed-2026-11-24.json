@@ -1,0 +1,14 @@
+{
+  "measuredAt": "2026-11-24T13:31:11Z",
+  "block": 26485331,
+  "lockedEtherForUnclaimedRequests": 37305.99242018072,
+  "lastFinalizedRequestId": 142469,
+  "window": [
+    140470,
+    142469
+  ],
+  "unclaimedInWindow": 542,
+  "unclaimedStEthInWindow": 16544.621264058358,
+  "medianDaysSinceRequest": 7.6,
+  "oldestDaysSinceRequest": 21.6
+}
