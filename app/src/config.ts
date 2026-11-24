@@ -16,7 +16,8 @@ export { baseSepolia };
 export const RPC = {
   base: "https://sepolia.base.org",
   lasna: "https://lasna-rpc.rnk.dev/",
-  ethereum: "https://ethereum-rpc.publicnode.com",
+  // Ethereum RPCs that answer browser (CORS) requests; publicnode refuses them.
+  ethereum: ["https://eth.drpc.org", "https://1rpc.io/eth"],
   reactive: "https://mainnet-rpc.rnk.dev/",
 };
 

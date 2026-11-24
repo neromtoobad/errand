@@ -1,4 +1,4 @@
-import { createPublicClient, decodeEventLog, http, toHex, type Hash, type Hex, type Log } from "viem";
+import { createPublicClient, decodeEventLog, fallback, http, toHex, type Hash, type Hex, type Log } from "viem";
 import { mainnet } from "viem/chains";
 import {
   BASE_BLOCK_SECONDS, D, LIDO, RPC, baseSepolia, demoDepositAbi, erc20Abi, errandLidoAbi, errandMorphoAbi, lasna,
@@ -16,7 +16,7 @@ async function errandSentLogs(from: bigint) {
   const to = await reactiveTestnet.getBlockNumber();
   return reactiveTestnet.getLogs({ address: D.errand, event: errandMorphoAbi[2], fromBlock: from, toBlock: to, strict: true });
 }
-const ethereum = createPublicClient({ chain: mainnet, transport: http(RPC.ethereum) });
+const ethereum = createPublicClient({ chain: mainnet, transport: fallback(RPC.ethereum.map((u) => http(u))) });
 const reactiveMainnet = createPublicClient({
   chain: { ...lasna, id: 1597, name: "Reactive", rpcUrls: { default: { http: [RPC.reactive] } } },
   transport: http(RPC.reactive),
@@ -59,8 +59,15 @@ export type Round = {
   callback?: { tx: Hash; block: bigint; timestamp: bigint; withdrawn: bigint; remainingShares: bigint };
 };
 
-/** What started a round: a Morpho Supply or Repay in our market, or the wallet's own exit request. */
-async function describeTrigger(tx: Hash): Promise<{ block: bigint; what: Trigger }> {
+/** What started a round. A mined receipt never changes, so each trigger is read once per page load. */
+const triggers = new Map<Hash, Promise<{ block: bigint; what: Trigger }>>();
+function describeTrigger(tx: Hash) {
+  if (!triggers.has(tx)) triggers.set(tx, readTrigger(tx).catch((e) => { triggers.delete(tx); throw e; }));
+  return triggers.get(tx)!;
+}
+
+/** A Morpho Supply or Repay in our market, or the wallet's own exit request. */
+async function readTrigger(tx: Hash): Promise<{ block: bigint; what: Trigger }> {
   const r = await base.getTransactionReceipt({ hash: tx });
   for (const l of r.logs) {
     try {
