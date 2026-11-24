@@ -1,0 +1,241 @@
+{
+  "measuredAt": "2026-11-24T16:16:52.829+00:00",
+  "deployment": "deployments/testnet.json",
+  "pollSeconds": 0.4,
+  "rounds": [
+    {
+      "round": "0 requestExit",
+      "trigger": {
+        "tx": "0x72bffcf77bae7287732af2281b97e6023a218670ad02d2b1962467a1030d477b",
+        "block": 63075408,
+        "timestamp": 1795536950
+      },
+      "reactive": {
+        "tx": "0xed7146e13357b8ba5954a508a410041168d0655943c9f4937fb41071589d71a9",
+        "block": 9149764,
+        "timestamp": 1795536949
+      },
+      "callback": {
+        "tx": "0xc587602b0c07bcd277c9c514ef95b47299f1dcfcec6c83687d40a24ba2480155",
+        "block": 63075414,
+        "timestamp": 1795536951,
+        "withdrawnWei": 0,
+        "remainingShares": 100000000000000000000000000,
+        "feePaidWei": 725762400000,
+        "gasUsed": 96506
+      },
+      "baseBlocks": 6,
+      "chainSeconds": 1,
+      "wallClock": {
+        "sent": "2026-11-24T16:15:48.760+00:00",
+        "triggerSeen": "2026-11-24T16:15:50.834+00:00",
+        "reactiveSeen": "2026-11-24T16:15:52.270+00:00",
+        "callbackSeen": "2026-11-24T16:15:53.501+00:00",
+        "triggerSeenToCallbackSeenSec": 2.67
+      }
+    },
+    {
+      "round": "1 repay 10",
+      "trigger": {
+        "tx": "0x02df331060a1e727429d94a3ac4c545f2ce6865f6ad5c13f41afafdf6e73c69b",
+        "block": 63075443,
+        "timestamp": 1795536957
+      },
+      "reactive": {
+        "tx": "0x22c127463641ef5c660c25912e2a99748c133bc0ce8c2cd5ba58472773712811",
+        "block": 9149770,
+        "timestamp": 1795536956
+      },
+      "callback": {
+        "tx": "0xa71e9fd069d2554ee539e42ddb01800c8e056c81a4ccf9b147349abbfeeefcf5",
+        "block": 63075446,
+        "timestamp": 1795536958,
+        "withdrawnWei": 10000000000000000000,
+        "remainingShares": 90000000000000000000000000,
+        "feePaidWei": 1042888933622,
+        "gasUsed": 139729
+      },
+      "baseBlocks": 3,
+      "chainSeconds": 1,
+      "wallClock": {
+        "sent": "2026-11-24T16:15:55.744+00:00",
+        "triggerSeen": "2026-11-24T16:15:57.802+00:00",
+        "reactiveSeen": "2026-11-24T16:15:58.767+00:00",
+        "callbackSeen": "2026-11-24T16:15:59.596+00:00",
+        "triggerSeenToCallbackSeenSec": 1.79
+      }
+    },
+    {
+      "round": "2 repay 15",
+      "trigger": {
+        "tx": "0x63913582a2e3babb00b240b9eb5bac091d00f2778605fb235d08933947ed0b4e",
+        "block": 63075475,
+        "timestamp": 1795536963
+      },
+      "reactive": {
+        "tx": "0xd288223ac983c47bdc09e87f2a44f933f84502e4ed089911e563a9887ea6b8c0",
+        "block": 9149776,
+        "timestamp": 1795536962
+      },
+      "callback": {
+        "tx": "0x8408413e300f446abbddb69e04f7929131ed23d15057c1b39345531f9f25dfe6",
+        "block": 63075478,
+        "timestamp": 1795536964,
+        "withdrawnWei": 15000000000000000000,
+        "remainingShares": 75000000000000000000000000,
+        "feePaidWei": 929854200000,
+        "gasUsed": 122629
+      },
+      "baseBlocks": 3,
+      "chainSeconds": 1,
+      "wallClock": {
+        "sent": "2026-11-24T16:16:02.338+00:00",
+        "triggerSeen": "2026-11-24T16:16:04.356+00:00",
+        "reactiveSeen": "2026-11-24T16:16:05.346+00:00",
+        "callbackSeen": "2026-11-24T16:16:06.708+00:00",
+        "triggerSeenToCallbackSeenSec": 2.35
+      }
+    },
+    {
+      "round": "3 repay 20",
+      "trigger": {
+        "tx": "0xe613bab578062e9cbbdec32d386668a605c91ba415d76fff771a6c15f6dd3e1d",
+        "block": 63075505,
+        "timestamp": 1795536969
+      },
+      "reactive": {
+        "tx": "0x0fceae490d723f60c09098602f42e8a0b1c4c93b9a677e1e8d7f484908968a16",
+        "block": 9149782,
+        "timestamp": 1795536969
+      },
+      "callback": {
+        "tx": "0x00acbc65beea1d8569d707194c1cb73b92ee9ddb3859d747b79fd3d81858b312",
+        "block": 63075510,
+        "timestamp": 1795536970,
+        "withdrawnWei": 20000000000000000000,
+        "remainingShares": 55000000000000000000000000,
+        "feePaidWei": 929854200000,
+        "gasUsed": 122629
+      },
+      "baseBlocks": 5,
+      "chainSeconds": 1,
+      "wallClock": {
+        "sent": "2026-11-24T16:16:08.292+00:00",
+        "triggerSeen": "2026-11-24T16:16:10.021+00:00",
+        "reactiveSeen": "2026-11-24T16:16:11.115+00:00",
+        "callbackSeen": "2026-11-24T16:16:12.188+00:00",
+        "triggerSeenToCallbackSeenSec": 2.17
+      }
+    },
+    {
+      "round": "4 repay 25",
+      "trigger": {
+        "tx": "0x8028164dee4309ec76c7bdd69c5df5a26871e9735c22f6dd8b5ac1349bae4bb8",
+        "block": 63075538,
+        "timestamp": 1795536976
+      },
+      "reactive": {
+        "tx": "0x44fb77a307984ec361da01dda626681fcef76c8fa58afcf94880a979599ae888",
+        "block": 9149788,
+        "timestamp": 1795536975
+      },
+      "callback": {
+        "tx": "0x492b21ecaf1e1661ed3054bbd195900661004b62815ed7d9a30ba672271ccbca",
+        "block": 63075541,
+        "timestamp": 1795536977,
+        "withdrawnWei": 25000000000000000000,
+        "remainingShares": 30000000000000000000000000,
+        "feePaidWei": 929854200000,
+        "gasUsed": 122629
+      },
+      "baseBlocks": 3,
+      "chainSeconds": 1,
+      "wallClock": {
+        "sent": "2026-11-24T16:16:14.583+00:00",
+        "triggerSeen": "2026-11-24T16:16:16.977+00:00",
+        "reactiveSeen": "2026-11-24T16:16:18.411+00:00",
+        "callbackSeen": "2026-11-24T16:16:19.679+00:00",
+        "triggerSeenToCallbackSeenSec": 2.7
+      }
+    },
+    {
+      "round": "5 deposit 10",
+      "trigger": {
+        "tx": "0x6beffb132114d2c6c49a091a101435503ff73c98c159b4ea8444db58b9f1b492",
+        "block": 63075572,
+        "timestamp": 1795536983
+      },
+      "reactive": {
+        "tx": "0x3b45721798e7ca849d5ce22b2c1ed7e6781e8176455f63e6ffb3a8eb834d34de",
+        "block": 9149795,
+        "timestamp": 1795536982
+      },
+      "callback": {
+        "tx": "0x54f0bcc8f4f98737aa3d23d94e5da86db8375b90d3e6e2bf33ae2aabfedf6770",
+        "block": 63075578,
+        "timestamp": 1795536984,
+        "withdrawnWei": 10000000000000000000,
+        "remainingShares": 20000000000000000000000000,
+        "feePaidWei": 929854200000,
+        "gasUsed": 122629
+      },
+      "baseBlocks": 6,
+      "chainSeconds": 1,
+      "wallClock": {
+        "sent": "2026-11-24T16:16:21.728+00:00",
+        "triggerSeen": "2026-11-24T16:16:23.422+00:00",
+        "reactiveSeen": "2026-11-24T16:16:24.449+00:00",
+        "callbackSeen": "2026-11-24T16:16:25.787+00:00",
+        "triggerSeenToCallbackSeenSec": 2.36
+      }
+    },
+    {
+      "round": "6 repay rest",
+      "trigger": {
+        "tx": "0x7e760c453b31325e430f5e938bb462b691a4906f030c00c55bbf9abbd8997262",
+        "block": 63075609,
+        "timestamp": 1795536990
+      },
+      "reactive": {
+        "tx": "0x7fe2c770033386be8ade5c1ba8ce3b558157e31f1700e82a43473821aa5c00cb",
+        "block": 9149802,
+        "timestamp": 1795536990
+      },
+      "callback": {
+        "tx": "0xdcb454971c5215e04d576be777ae40cff19db41da2080b618707ab64d1b9ed89",
+        "block": 63075614,
+        "timestamp": 1795536991,
+        "withdrawnWei": 20000000000000000000,
+        "remainingShares": 0,
+        "feePaidWei": 928540800000,
+        "gasUsed": 122430
+      },
+      "baseBlocks": 5,
+      "chainSeconds": 1,
+      "wallClock": {
+        "sent": "2026-11-24T16:16:29.075+00:00",
+        "triggerSeen": "2026-11-24T16:16:30.711+00:00",
+        "reactiveSeen": "2026-11-24T16:16:32.083+00:00",
+        "callbackSeen": "2026-11-24T16:16:33.345+00:00",
+        "triggerSeenToCallbackSeenSec": 2.63
+      }
+    }
+  ],
+  "summary": {
+    "rounds": 6,
+    "baseBlocksTriggerToCallback": {
+      "min": 3,
+      "median": 5,
+      "max": 6
+    },
+    "chainSecondsTriggerToCallback": {
+      "min": 1,
+      "median": 1,
+      "max": 1
+    },
+    "withdrawnTotalWei": 100000000000000000000,
+    "walletSharesLeft": 0,
+    "errandArmedAfter": false,
+    "disarmTx": "0xcda3ebb2283799e80c429a78d9b73605c3dcc940199a4c50db50e3e3efa21675"
+  }
+}
