@@ -46,5 +46,28 @@ else
   elif [ "$FIN" = "true" ]; then echo "FAIL  Lido request $RID is finalized but not claimed"; fail=$((fail+1))
   else wait_ "Lido request $RID not finalized by Lido yet (Lido finalizes about daily)"; fi
 fi
+
+# Every Second Counts (testnets): Base Sepolia + Reactive Lasna
+T=deployments/testnet.json
+BASE=${BASE_SEPOLIA_RPC_URL:-https://sepolia.base.org}
+LASNA=${LASNA_RPC_URL:-https://lasna-rpc.rnk.dev/}
+TW=$(J=$T; get wallet); TE=$(J=$T; get reactive.ErrandMorpho); TI=$(J=$T; get base.ErrandMorphoWallet); MID=$(J=$T; get base.marketId)
+J=$T
+check "ErrandMorpho has code on Lasna" "$([ "$(cast code "$TE" -r "$LASNA" | wc -c)" -gt 10 ] && echo yes)" yes
+check "ErrandMorpho watches the recorded market on Base Sepolia (84532)" "$(cast call "$TE" 'MARKET_ID()(bytes32)' -r "$LASNA")/$(cast call "$TE" 'CHAIN_ID()(uint256)' -r "$LASNA" | awk '{print $1}')" "$MID/84532"
+check "Wallet is delegated to ErrandMorphoWallet on Base Sepolia (EIP-7702)" "$(cast code "$TW" -r "$BASE" | lc)" "$(echo "0xef0100${TI:2}" | lc)"
+check "ErrandMorphoWallet trusts only our ErrandMorpho" "$(cast call "$TI" 'ERRAND()(address)' -r "$BASE" | lc)" "$(echo "$TE" | lc)"
+check "The market is real Morpho Blue state (created, lltv 0.86)" "$(cast call 0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb 'idToMarketParams(bytes32)(address,address,address,address,uint256)' "$MID" -r "$BASE" | tail -1 | awk '{print $1}')" 860000000000000000
+RACE=$(ls evidence/race-*.json 2>/dev/null | tail -1)
+if [ -n "$RACE" ]; then
+  SHARES=$(cast call 0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb 'position(bytes32,address)(uint256,uint128,uint128)' "$MID" "$TW" -r "$BASE" | head -1 | awk '{print $1}')
+  check "After the race ($RACE) the wallet is fully out of the market" "$SHARES" 0
+  check "Errand stood down once the wallet was out (armed = false)" "$(cast call "$TE" 'armed()(bool)' -r "$LASNA")" false
+  for TX in $(python3 -c "import json;[print(r['callback']['tx']) for r in json.load(open('$RACE'))['rounds']]"); do
+    S=$(cast receipt "$TX" status -r "$BASE" 2>/dev/null | awk '{print $1}'); [ "$S" = 1 ] && S=true
+    check "Callback $TX succeeded on Base Sepolia" "$S" true
+  done
+fi
+
 echo "---"; echo "$pass passed, $fail failed, $pending waiting"
 [ "$fail" -eq 0 ]
