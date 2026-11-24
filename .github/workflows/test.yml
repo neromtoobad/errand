@@ -9,7 +9,8 @@ jobs:
           submodules: recursive
       - uses: foundry-rs/foundry-toolchain@v1
       - run: forge build
-      - name: Unit tests and Ethereum mainnet fork tests
+      - name: Unit tests, Ethereum mainnet fork tests, Base Sepolia fork tests
         env:
           ETHEREUM_RPC_URL: https://ethereum-rpc.publicnode.com
+          BASE_SEPOLIA_RPC_URL: https://sepolia.base.org
         run: forge test -vv
