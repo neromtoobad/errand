@@ -20,5 +20,12 @@
     "chainId": 5318007,
     "ErrandMorpho": "0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651",
     "deployTx": "0xac1ae838e16484f14f66c3a1f5489c4750d16b84e2ede146031671695127957b"
+  },
+  "demo": {
+    "DemoDeposit": "0x6D05eac4aDEA141AC9fa39fED6C1Bc896873F648",
+    "deployTx": "0x9a735baa154e7bb0dde3e3db645ffa787ae12acf1548057bab14164847be4b1e",
+    "supplyTx": "0x7db52d10f6a8ceb3c9184fbc6ce9ea423664bcc26f2ef050216a46d6fc06123f",
+    "borrowTx": "0x42b8bcf929f61ec25c67f7de704eff6410ad25bd24c45f362273dea16cb4ed67",
+    "requestExitTx": "0xf71c214e1b4c2e26d53f0e7420ce1182a7253bc72aa9b85be84aab0b05bdec73"
   }
 }
