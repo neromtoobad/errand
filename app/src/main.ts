@@ -413,6 +413,7 @@ async function deposit() {
   setSplit(1, "wait", `${baseTx(hash)}`);
   let t0 = 0;
   const signal = { stopped: false };
+  // Give up watching after 2 minutes (the round itself is never timed by this; only chain events move the board).
   const timeout = window.setTimeout(() => (signal.stopped = true), 120_000);
   try {
     await followRound(hash, (ev) => {

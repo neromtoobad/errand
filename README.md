@@ -13,7 +13,7 @@ Two errands are built:
 
 **Try it live: [errand.nerom.site](https://errand.nerom.site).** A lender's money is stuck in a fully borrowed market. Deposit some test tUSD with one transaction, and time how fast their wallet takes it back. The page reads every number from the chains.
 
-**Built at:** [Reactive Omni Buildathon](https://dorahacks.io/hackathon/reactive-omni-buildathon/detail), Nov 5 – Dec 5, 2026 · **Tracks:** Set It and Forget It (Lido), Every Second Counts (Morpho) · **Video:** not recorded yet
+**Built at:** [Reactive Omni Buildathon](https://dorahacks.io/hackathon/reactive-omni-buildathon/detail), Nov 5 – Dec 5, 2026 · **Tracks:** Set It and Forget It (Lido), Every Second Counts (Morpho) · **Video:** not recorded yet · **Judges:** [check it in 2 minutes](JUDGES.md)
 
 **Proof so far:**
 - **Morpho exit:** the full loop ran 7 times on Base Sepolia and Lasna, with every transaction linked [below](#latency-measured-on-base-sepolia). [ErrandMorpho on Lasna](https://lasna.reactscan.net/address/0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651) is verified ([Sourcify](https://repo.sourcify.dev/5318007/0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651)). The wallet got all 100 tUSD out of a fully borrowed market, and then Errand switched itself off.
@@ -310,6 +310,7 @@ The first commit is from 2026-11-23, after the event started on Nov 5. All of th
 was written during the event. The only outside code is in the dependencies:
 [forge-std](https://github.com/foundry-rs/forge-std) and
 [reactive-lib-omni](https://github.com/Reactive-Network/reactive-lib-omni) v0.1.0, as git submodules in `lib/`.
+Some commits are seconds apart: a finished piece of work was committed file by file, so each commit holds one change.
 
 ## AI usage
 
