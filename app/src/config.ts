@@ -49,6 +49,9 @@ export const LIDO = {
   wallet: mainnet.wallet as Address,
   errandLido: mainnet.reactive.ErrandLido as Address,
   ethereumWalletCode: (mainnet as { ethereum?: { ErrandWallet?: string } }).ethereum?.ErrandWallet as Address | undefined,
+  delegationTx: (mainnet as { ethereum?: { delegationTx?: string } }).ethereum?.delegationTx,
+  requestTx: (mainnet as { lido?: { requestTx?: string } }).lido?.requestTx,
+  claimTx: (mainnet as { lido?: { claimTx?: string } }).lido?.claimTx,
 };
 
 /** Base Sepolia makes a block every 0.2 s; block timestamps have 1 s resolution. */

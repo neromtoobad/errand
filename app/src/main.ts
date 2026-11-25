@@ -463,18 +463,25 @@ async function refreshLido() {
   $<HTMLAnchorElement>("lido-r").href = `${EXPLORER.reactive}/address/${LIDO.errandLido}`;
   $("lido-dot1").className = "dot on";
   const l = await readLido();
+  const eth = (tx?: string, text = "Etherscan") => (tx ? ` <a href="https://etherscan.io/tx/${tx}" target="_blank" rel="noopener">${text}</a>` : "");
   if (l.delegated) {
-    $("lido-eth").innerHTML = `<strong>Wallet switched on</strong> on Ethereum (EIP-7702 delegation)`;
+    $("lido-eth").innerHTML = `<strong>Wallet switched on</strong> with an EIP-7702 delegation on Ethereum.${eth(LIDO.delegationTx, "Delegation tx")}`;
     $("lido-dot2").className = "dot on";
   } else {
-    $("lido-eth").innerHTML = `<strong>Ethereum side waiting for cheap gas.</strong> The wallet has 0.0005 ETH, so it deploys when the base fee drops.`;
+    $("lido-eth").innerHTML = `<strong>Ethereum side not switched on yet.</strong>`;
     $("lido-dot2").className = "dot wait";
   }
-  const n = l.tracked?.length ?? 0;
-  $("lido-claim").innerHTML = n
-    ? `<strong>${n} Lido request${n > 1 ? "s" : ""} tracked,</strong> claimed as soon as Lido finalizes`
-    : `<strong>First real claim:</strong> after the wallet requests a withdrawal and Lido finalizes it`;
-  $("lido-dot3").className = n ? "dot on" : "dot wait";
+  const ids = l.tracked ?? [];
+  if (LIDO.claimTx) {
+    $("lido-claim").innerHTML = `<strong>Claimed by Errand</strong> on Ethereum.${eth(LIDO.claimTx, "Claim tx")}`;
+    $("lido-dot3").className = "dot on";
+  } else if (ids.length) {
+    $("lido-claim").innerHTML = `<strong>Request #${ids.join(", #")} tracked,</strong> claimed as soon as Lido finalizes it (Lido finalizes about daily).${eth(LIDO.requestTx, "Request tx")}`;
+    $("lido-dot3").className = "dot wait";
+  } else {
+    $("lido-claim").innerHTML = `<strong>No Lido request tracked right now.</strong>`;
+    $("lido-dot3").className = "dot wait";
+  }
 }
 
 /* ---------------- wire up ---------------- */
