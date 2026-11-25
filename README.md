@@ -13,7 +13,7 @@ Two errands are built:
 
 **Try it live: [errand.nerom.site](https://errand.nerom.site).** A lender's money is stuck in a fully borrowed market. Deposit some test tUSD with one transaction, and time how fast their wallet takes it back. The page reads every number from the chains.
 
-**Built at:** [Reactive Omni Buildathon](https://dorahacks.io/hackathon/reactive-omni-buildathon/detail), Nov 5 – Dec 5, 2026 · **Tracks:** Set It and Forget It (Lido), Every Second Counts (Morpho) · **Video:** not recorded yet · **Judges:** [check it in 2 minutes](JUDGES.md)
+**Built at:** [Reactive Omni Buildathon](https://dorahacks.io/hackathon/reactive-omni-buildathon/detail), Nov 5 – Dec 5, 2026 · **Tracks:** Set It and Forget It (Lido), Every Second Counts (Morpho) · **Video:** [2-minute demo](https://youtu.be/ktnRf31DP0Q) · **Judges:** [check it in 2 minutes](JUDGES.md)
 
 **Proof so far:**
 - **Morpho exit:** the full loop has run 30 times on Base Sepolia and Lasna (7 in a scripted race, 23 more against the live demo), with every transaction in [evidence/](evidence/). [ErrandMorpho on Lasna](https://lasna.reactscan.net/address/0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651) is verified ([Sourcify](https://repo.sourcify.dev/5318007/0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651)). The wallet got all 100 tUSD out of a fully borrowed market, and then Errand switched itself off.

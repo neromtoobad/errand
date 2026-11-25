@@ -10,7 +10,7 @@ Shared fields:
 - **Tagline:** Your wallet runs its own errands.
 - **GitHub:** https://github.com/neromtoobad/errand
 - **Live demo:** https://errand.nerom.site
-- **Video:** (link once recorded, under 3 minutes)
+- **Video:** https://youtu.be/ktnRf31DP0Q (2:00)
 - **Check it in 2 minutes:** https://github.com/neromtoobad/errand/blob/main/JUDGES.md
 
 ---
