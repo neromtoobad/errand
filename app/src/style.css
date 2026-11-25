@@ -241,6 +241,12 @@ h2 { font-size: clamp(28px, 3.4vw, 42px); line-height: 1.02; font-weight: 600; l
 .chart.in .bar b { opacity: 1; }
 .bar small { position: absolute; left: 50%; top: calc(100% + 6px); transform: translateX(-50%); font: 500 11px var(--mono); color: var(--faint); }
 .bar:hover i { filter: brightness(1.12); }
+.bars.dense { gap: clamp(2px, .45vw, 6px); }
+.bars.dense .bar i { border-radius: 4px 4px 2px 2px; }
+.bars.dense .bar b { display: none; }
+.bars.dense .bar:hover b { display: block; opacity: 1; }
+.more { display: block; width: 100%; padding: 14px 16px; border: 0; border-top: 1px solid var(--line-2); background: none; font: inherit; font-size: 14px; color: var(--muted); cursor: pointer; }
+.more:hover { color: var(--ink); }
 
 .table-wrap { overflow-x: auto; }
 table.rounds { width: 100%; border-collapse: collapse; font-size: 14.5px; min-width: 820px; }

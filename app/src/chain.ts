@@ -5,7 +5,10 @@ import {
   morphoAbi, walletAbi,
 } from "./config";
 
-export const base = createPublicClient({ chain: baseSepolia, transport: http(RPC.base, { retryCount: 3 }), cacheTime: 0 });
+// Batched: loading every round reads ~100 receipts and blocks at once, and the public RPC rate-limits single calls.
+export const base = createPublicClient({
+  chain: baseSepolia, transport: http(RPC.base, { retryCount: 3, batch: { batchSize: 10 } }), cacheTime: 0,
+});
 export const reactiveTestnet = createPublicClient({ chain: lasna, transport: http(RPC.lasna, { retryCount: 3 }), cacheTime: 0 });
 
 /**
@@ -128,34 +131,56 @@ async function progressLogs(from: bigint, to: bigint): Promise<ProgressLog[]> {
   })) as ProgressLog[];
 }
 
-/** Every errand ErrandMorpho has sent, newest first, each matched with its trigger and the callback it produced. */
-export async function readRounds(limit = 12): Promise<Round[]> {
+/** A callback, once found, never changes, so each one is read from the chain once per page load. */
+const callbacks = new Map<Hash, NonNullable<Round["callback"]> & { key: string }>();
+
+/** Every errand ErrandMorpho has sent (or the latest `limit`), newest first, each matched with its trigger and the
+ *  callback it produced. */
+export async function readRounds(limit?: number): Promise<Round[]> {
   const sent = await errandSentLogs(D.errandFromBlock);
-  const recent = sent.slice(-limit);
-  const rounds: Round[] = await Promise.all(recent.map(async (l) => {
-    const tx = toHex(l.args.triggeredByTxHash, { size: 32 }) as Hash;
-    const t = await describeTrigger(tx);
-    return {
-      n: l.args.errandNumber,
-      trigger: { tx, block: t.block, timestamp: await timestampOf(base, t.block), what: t.what },
-      reactive: { tx: l.transactionHash, block: l.blockNumber },
-    };
-  }));
+  const recent = limit ? sent.slice(-limit) : sent;
+  const rounds: Round[] = [];
+  for (let i = 0; i < recent.length; i += 10) { // in groups, so the public RPC doesn't rate-limit the first load
+    rounds.push(...await Promise.all(recent.slice(i, i + 10).map(async (l) => {
+      const tx = toHex(l.args.triggeredByTxHash, { size: 32 }) as Hash;
+      const t = await describeTrigger(tx);
+      return {
+        n: l.args.errandNumber,
+        trigger: { tx, block: t.block, timestamp: await timestampOf(base, t.block), what: t.what },
+        reactive: { tx: l.transactionHash, block: l.blockNumber },
+      };
+    })));
+  }
   // Each errand produces one ExitProgress. Pair them in order: the first unused callback after each trigger.
   rounds.sort((a, b) => Number(a.trigger.block - b.trigger.block));
   if (rounds.length) {
     const used = new Set<string>();
     const latest = await base.getBlockNumber();
+    // read the logs for rounds whose callback we haven't found yet, a few at a time (public RPC)
+    const open = rounds.filter((r) => !callbacks.has(r.reactive.tx));
+    const found = new Map<Hash, ProgressLog[]>();
+    for (let i = 0; i < open.length; i += 6) {
+      await Promise.all(open.slice(i, i + 6).map(async (r) => {
+        const to = r.trigger.block + 150n > latest ? latest : r.trigger.block + 150n;
+        found.set(r.reactive.tx, await progressLogs(r.trigger.block, to));
+      }));
+    }
     for (const r of rounds) {
-      const to = r.trigger.block + 150n > latest ? latest : r.trigger.block + 150n;
-      const logs = await progressLogs(r.trigger.block, to);
-      const hit = logs.find((p) => !used.has(p.transactionHash + p.logIndex));
+      const known = callbacks.get(r.reactive.tx);
+      if (known) {
+        used.add(known.key);
+        r.callback = known;
+        continue;
+      }
+      const hit = (found.get(r.reactive.tx) ?? []).find((p) => !used.has(p.transactionHash + p.logIndex));
       if (hit) {
-        used.add(hit.transactionHash + hit.logIndex);
+        const key = hit.transactionHash + hit.logIndex;
+        used.add(key);
         r.callback = {
           tx: hit.transactionHash, block: hit.blockNumber, timestamp: await timestampOf(base, hit.blockNumber),
           withdrawn: hit.args.withdrawn, remainingShares: hit.args.remainingShares,
         };
+        callbacks.set(r.reactive.tx, { ...r.callback, key });
       }
     }
   }

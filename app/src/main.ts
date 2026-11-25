@@ -61,13 +61,22 @@ function whatFreed(r: Round) {
   return `<span class="tag">Other</span>`;
 }
 
+const TABLE_ROWS = 12;
+let showAll = false;
+let lastRounds: Round[] = [];
+
 function renderRounds(rounds: Round[]) {
+  lastRounds = rounds;
   const body = $("rounds-body");
   if (!rounds.length) {
     body.innerHTML = `<tr><td colspan="7" class="empty">No rounds yet.</td></tr>`;
     return;
   }
-  body.innerHTML = rounds.map((r) => {
+  const shown = showAll ? rounds : rounds.slice(0, TABLE_ROWS);
+  const more = $("rounds-more");
+  more.hidden = rounds.length <= TABLE_ROWS;
+  more.textContent = showAll ? `Show the latest ${TABLE_ROWS}` : `Show all ${rounds.length} rounds`;
+  body.innerHTML = shown.map((r) => {
     const secs = onchainSeconds(r);
     const blocks = r.callback ? Number(r.callback.block - r.trigger.block) : undefined;
     const isNew = !rendered.has(r.reactive.tx);
@@ -85,9 +94,10 @@ function renderRounds(rounds: Round[]) {
 
   const timed = rounds.filter((r) => r.callback && r.callback.withdrawn > 0n).map((r) => onchainSeconds(r)!).sort((a, b) => a - b);
   if (timed.length) {
-    const med = timed[Math.floor(timed.length / 2)];
-    $("median").textContent = med.toFixed(1);
-    $("speed-range").textContent = `fastest ${timed[0].toFixed(1)} s · slowest ${timed[timed.length - 1].toFixed(1)} s · ${timed.length} withdrawals`;
+    // nearest-rank percentiles, the same as tools/rounds.py
+    const pct = (q: number) => timed[Math.max(0, Math.ceil((timed.length * q) / 100) - 1)];
+    $("median").textContent = pct(50).toFixed(1);
+    $("speed-range").textContent = `fastest ${timed[0].toFixed(1)} s · p95 ${pct(95).toFixed(1)} s · slowest ${timed[timed.length - 1].toFixed(1)} s · ${timed.length} withdrawals`;
     $("rounds-sum").textContent = `Each bar is one errand: something frees money on Base Sepolia, Errand reacts on Lasna, and the lender's wallet withdraws back on Base Sepolia.`;
   }
   renderChart(rounds);
@@ -104,15 +114,19 @@ function renderChart(rounds: Round[]) {
     g.style.setProperty("--y", `${(v / top) * 100}%`);
     g.querySelector("em")!.textContent = `${v.toFixed(1)} s`;
   });
-  $("bars").innerHTML = done.map((r, i) => {
+  const dense = done.length > 16;
+  const bars = $("bars");
+  bars.classList.toggle("dense", dense);
+  const step = Math.min(0.06, 1.2 / done.length);
+  bars.innerHTML = done.map((r, i) => {
     const s = secs[i];
     const w = r.trigger.what;
     const mine = w.by && account && w.by.toLowerCase() === account.toLowerCase();
     const cls = mine ? "you" : w.kind === "deposit" ? "deposit" : w.kind === "exit request" ? "exit" : "";
     const blocks = Number(r.callback!.block - r.trigger.block);
     const title = `Round ${r.n}: ${w.kind}${w.amount !== undefined ? ` ${tusd(w.amount, 0)} tUSD` : ""}, ${blocks} blocks, ${tusd(r.callback!.withdrawn)} tUSD withdrawn`;
-    return `<a class="bar ${cls}" href="${EXPLORER.base}/tx/${r.callback!.tx}" target="_blank" rel="noopener" title="${title}" style="--h:${(s / top) * 100}%;--d:${i * 0.06}s">
-      <i></i><b>${s.toFixed(1)}</b><small>#${r.n}</small></a>`;
+    return `<a class="bar ${cls}" href="${EXPLORER.base}/tx/${r.callback!.tx}" target="_blank" rel="noopener" title="${title}" style="--h:${(s / top) * 100}%;--d:${(i * step).toFixed(3)}s">
+      <i></i><b>${s.toFixed(1)}</b>${!dense || i % 5 === 0 || i === done.length - 1 ? `<small>#${r.n}</small>` : ""}</a>`;
   }).join("");
 }
 
@@ -261,7 +275,7 @@ async function refreshRounds() {
   if (roundsBusy) return;
   roundsBusy = true;
   try {
-    renderRounds(await readRounds(12));
+    renderRounds(await readRounds());
   } catch {
     $("rounds-sum").textContent = "Couldn't read the chains just now; retrying.";
   } finally {
@@ -502,6 +516,7 @@ function init() {
   $("connect").addEventListener("click", connect);
   $("go").addEventListener("click", deposit);
   $("replay").addEventListener("click", replay);
+  $("rounds-more").addEventListener("click", () => { showAll = !showAll; renderRounds(lastRounds); });
   reveal();
   document.querySelectorAll<HTMLButtonElement>(".chip").forEach((c) =>
     c.addEventListener("click", () => {
