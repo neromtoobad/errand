@@ -4,7 +4,7 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 export PATH="$HOME/.foundry/bin:$PATH"
-ETH=${ETHEREUM_RPC_URL:-https://ethereum-rpc.publicnode.com}
+ETH=${ETHEREUM_RPC_URL:-https://eth.drpc.org}
 RNK=${REACTIVE_RPC_URL:-https://mainnet-rpc.rnk.dev/}
 J=deployments/mainnet.json
 get() { python3 -c "import json,sys;d=json.load(open('$J'))
@@ -60,9 +60,13 @@ check "ErrandMorphoWallet trusts only our ErrandMorpho" "$(cast call "$TI" 'ERRA
 check "The market is real Morpho Blue state (created, lltv 0.86)" "$(cast call 0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb 'idToMarketParams(bytes32)(address,address,address,address,uint256)' "$MID" -r "$BASE" | tail -1 | awk '{print $1}')" 860000000000000000
 RACE=$(ls evidence/race-*.json 2>/dev/null | tail -1)
 if [ -n "$RACE" ]; then
-  SHARES=$(cast call 0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb 'position(bytes32,address)(uint256,uint128,uint128)' "$MID" "$TW" -r "$BASE" | head -1 | awk '{print $1}')
-  check "After the race ($RACE) the wallet is fully out of the market" "$SHARES" 0
-  check "Errand stood down once the wallet was out (armed = false)" "$(cast call "$TE" 'armed()(bool)' -r "$LASNA")" false
+  # The race ended with the wallet fully out; read that from the last callback's ExitProgress log,
+  # because the demo was re-armed afterwards (script/testnet/rearm-demo.sh) and lends again now.
+  LAST=$(python3 -c "import json;print(json.load(open('$RACE'))['rounds'][-1]['callback']['tx'])")
+  EP=$(cast keccak 'ExitProgress(bytes32,uint256,uint256)')
+  LEFT=$(cast receipt "$LAST" --json -r "$BASE" | python3 -c "import json,sys;l=[x for x in json.load(sys.stdin)['logs'] if x['topics'][0]=='$EP'];print(int(l[-1]['data'][66:130],16) if l else 'none')")
+  check "The race ($RACE) ended with the wallet fully out (last callback: 0 shares left)" "$LEFT" 0
+  check "Errand is re-armed for visitors on errand.nerom.site (armed = true)" "$(cast call "$TE" 'armed()(bool)' -r "$LASNA")" true
   for TX in $(python3 -c "import json;[print(r['callback']['tx']) for r in json.load(open('$RACE'))['rounds']]"); do
     S=$(cast receipt "$TX" status -r "$BASE" 2>/dev/null | awk '{print $1}'); [ "$S" = 1 ] && S=true
     check "Callback $TX succeeded on Base Sepolia" "$S" true
