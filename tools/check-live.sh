@@ -72,6 +72,16 @@ if [ -n "$RACE" ]; then
     check "Callback $TX succeeded on Base Sepolia" "$S" true
   done
 fi
+ROUNDS=$(ls evidence/rounds-*.json 2>/dev/null | tail -1)
+if [ -n "$ROUNDS" ]; then
+  # The extra rounds against the live demo (tools/rounds.py): every callback tx succeeded.
+  N=0; OK=0
+  for TX in $(python3 -c "import json;[print(r['callback']['tx']) for r in json.load(open('$ROUNDS'))['rounds']]"); do
+    N=$((N + 1))
+    case "$(cast receipt "$TX" status -r "$BASE" 2>/dev/null | awk '{print $1}')" in 1|true) OK=$((OK + 1));; esac
+  done
+  check "All $N callbacks in $ROUNDS succeeded on Base Sepolia" "$OK/$N" "$N/$N"
+fi
 
 echo "---"; echo "$pass passed, $fail failed, $pending waiting"
 [ "$fail" -eq 0 ]
