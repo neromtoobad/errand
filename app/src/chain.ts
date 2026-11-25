@@ -12,9 +12,26 @@ export const reactiveTestnet = createPublicClient({ chain: lasna, transport: htt
  * ErrandSent events on Lasna from `from` up to the current head. Lasna's public RPC caches eth_getLogs answers
  * by request body, so an open-ended query keeps returning old results; naming the head block makes each poll new.
  */
+/** Lasna rejects getLogs over more than 30,000 blocks, so read in windows. Past windows never change,
+ *  so their results are kept; only the window that ends at the head is read again. */
+const LASNA_LOG_WINDOW = 29_999n;
+const sentWindows = new Map<bigint, Promise<Awaited<ReturnType<typeof sentLogsIn>>>>();
+function sentLogsIn(fromBlock: bigint, toBlock: bigint) {
+  return reactiveTestnet.getLogs({ address: D.errand, event: errandMorphoAbi[2], fromBlock, toBlock, strict: true });
+}
 async function errandSentLogs(from: bigint) {
-  const to = await reactiveTestnet.getBlockNumber();
-  return reactiveTestnet.getLogs({ address: D.errand, event: errandMorphoAbi[2], fromBlock: from, toBlock: to, strict: true });
+  const head = await reactiveTestnet.getBlockNumber();
+  const reads = [];
+  for (let start = from; start <= head; start += LASNA_LOG_WINDOW + 1n) {
+    const end = start + LASNA_LOG_WINDOW;
+    if (end >= head) {
+      reads.push(sentLogsIn(start, head)); // toBlock = head, never cached (the RPC caches by request body)
+    } else {
+      if (!sentWindows.has(start)) sentWindows.set(start, sentLogsIn(start, end).catch((e) => { sentWindows.delete(start); throw e; }));
+      reads.push(sentWindows.get(start)!);
+    }
+  }
+  return (await Promise.all(reads)).flat();
 }
 const ethereum = createPublicClient({ chain: mainnet, transport: fallback(RPC.ethereum.map((u) => http(u))) });
 const reactiveMainnet = createPublicClient({
