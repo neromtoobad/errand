@@ -1,0 +1,669 @@
+{
+  "measuredAt": "2026-11-25T08:46:08.706+00:00",
+  "deployment": "deployments/testnet.json",
+  "pollSeconds": 0.4,
+  "sentBy": "our test borrower key (0xF40a9e19d97A65e56C5B5576bD4D32683a6F73B0)",
+  "rounds": [
+    {
+      "round": "1 deposit 10 (DemoDeposit)",
+      "trigger": {
+        "tx": "0x58960f78a4faac2940c40e261a749230eb8857ab89f1c7585f4bfbbe5a0a91de",
+        "block": 63370316,
+        "timestamp": 1795595932
+      },
+      "reactive": {
+        "tx": "0xfd0741e254d7da1ff49cf1ceb506f052c7b26354bfb4e6282468034b3a5db509",
+        "block": 9204386,
+        "timestamp": 1795595931
+      },
+      "callback": {
+        "tx": "0x8d80a8679a647a5fcad2b0837519137994715ff292803dfc75e8b4cac169f2db",
+        "block": 63370320,
+        "timestamp": 1795595932,
+        "withdrawnWei": 10000000000000000000,
+        "remainingShares": 970000000000000000000000000,
+        "feePaidWei": 909275400000,
+        "gasUsed": 119511
+      },
+      "baseBlocks": 4,
+      "chainSeconds": 0,
+      "wallClock": {
+        "triggerSeenToCallbackSeenSec": 3.2,
+        "source": "the run's console log"
+      }
+    },
+    {
+      "round": "2 repay 10",
+      "trigger": {
+        "tx": "0xf9c0f9e74ec926ddd6aeb0b92d0cac479bcb52f65df38d9740d41b0b4b1cb02f",
+        "block": 63370390,
+        "timestamp": 1795595946
+      },
+      "reactive": {
+        "tx": "0xdbdc9f5ba8b6af8080e5997a759f144060cd906ef25ff9580017bc8f4319aa9a",
+        "block": 9204400,
+        "timestamp": 1795595946
+      },
+      "callback": {
+        "tx": "0x82402d5a1a4d9ecc7b6d95f28a436add9c43ef9a4de3ee55914625f6d530279a",
+        "block": 63370396,
+        "timestamp": 1795595948,
+        "withdrawnWei": 10000000000000000000,
+        "remainingShares": 960000000000000000000000000,
+        "feePaidWei": 930678811611,
+        "gasUsed": 122629
+      },
+      "baseBlocks": 6,
+      "chainSeconds": 2,
+      "wallClock": {
+        "triggerSeenToCallbackSeenSec": 3.6,
+        "source": "the run's console log"
+      }
+    },
+    {
+      "round": "3 deposit 10 (DemoDeposit)",
+      "trigger": {
+        "tx": "0xb4a9fd780f8f5c7c6cea6b3f408bf9da11a15f76f517af6ee296ce5ea84b78b1",
+        "block": 63370464,
+        "timestamp": 1795595961
+      },
+      "reactive": {
+        "tx": "0xe35d21468c977461908c09869a88fba5901209934c8832292abf32c8e9e2e16c",
+        "block": 9204413,
+        "timestamp": 1795595960
+      },
+      "callback": {
+        "tx": "0x574e087715240a0142684c8bffe9264d9c916e6970a64e4683a946e2a3127750",
+        "block": 63370468,
+        "timestamp": 1795595962,
+        "withdrawnWei": 10000000000000000000,
+        "remainingShares": 950000000000000000000000000,
+        "feePaidWei": 929854200000,
+        "gasUsed": 122629
+      },
+      "baseBlocks": 4,
+      "chainSeconds": 1,
+      "wallClock": {
+        "triggerSeenToCallbackSeenSec": 2.8,
+        "source": "the run's console log"
+      }
+    },
+    {
+      "round": "4 repay 10",
+      "trigger": {
+        "tx": "0x09ca60da6994b33d9ba49ab6ff0231a890ad339caa2becb5b684fc62570bc071",
+        "block": 63370540,
+        "timestamp": 1795595976
+      },
+      "reactive": {
+        "tx": "0xbb0bb2e5e169a1b126fe0c8810a413a643765444b35843cbc0268240b1df84c3",
+        "block": 9204427,
+        "timestamp": 1795595976
+      },
+      "callback": {
+        "tx": "0xc5c5f4cb59fbc395b482535904d6f8b32c2ca92b046f27396a32b04be86dea0a",
+        "block": 63370546,
+        "timestamp": 1795595978,
+        "withdrawnWei": 10000000000000000000,
+        "remainingShares": 940000000000000000000000000,
+        "feePaidWei": 929854200000,
+        "gasUsed": 122629
+      },
+      "baseBlocks": 6,
+      "chainSeconds": 2,
+      "wallClock": {
+        "triggerSeenToCallbackSeenSec": 3.6,
+        "source": "the run's console log"
+      }
+    },
+    {
+      "round": "5 deposit 10 (DemoDeposit)",
+      "trigger": {
+        "tx": "0xee443eed1e9791d9e4f59b83a527dd5ac8a4900578f248e3429ffdb1e22b888d",
+        "block": 63370614,
+        "timestamp": 1795595991
+      },
+      "reactive": {
+        "tx": "0x12d1f7f4d3b5c17646f6bbd57e88ed1ef650df09471e4d8319c927928d37e63c",
+        "block": 9204440,
+        "timestamp": 1795595990
+      },
+      "callback": {
+        "tx": "0x5877ef1150b714bb72cd4f5adc3da93111086aa351daa50974dd1dcca60a660b",
+        "block": 63370620,
+        "timestamp": 1795595992,
+        "withdrawnWei": 10000000000000000000,
+        "remainingShares": 930000000000000000000000000,
+        "feePaidWei": 929854200000,
+        "gasUsed": 122629
+      },
+      "baseBlocks": 6,
+      "chainSeconds": 1,
+      "wallClock": {
+        "triggerSeenToCallbackSeenSec": 3.5,
+        "source": "the run's console log"
+      }
+    },
+    {
+      "round": "6 repay 10",
+      "trigger": {
+        "tx": "0x9995bc6033e8a075c5b7f9029c54f458d8b2d549dc600db70bc548b0fead282b",
+        "block": 63370687,
+        "timestamp": 1795596006
+      },
+      "reactive": {
+        "tx": "0x9975f18d304bd5fe7fb9fbc21b11371339d8534602335207a60b3a10058230f0",
+        "block": 9204453,
+        "timestamp": 1795596005
+      },
+      "callback": {
+        "tx": "0x6b12737fa73a6b5ad16e571a68500086d224f83b7c121059820abdda7c3f9444",
+        "block": 63370693,
+        "timestamp": 1795596007,
+        "withdrawnWei": 10000000000000000000,
+        "remainingShares": 920000000000000000000000000,
+        "feePaidWei": 929854200000,
+        "gasUsed": 122629
+      },
+      "baseBlocks": 6,
+      "chainSeconds": 1,
+      "wallClock": {
+        "triggerSeenToCallbackSeenSec": 2.9,
+        "source": "the run's console log"
+      }
+    },
+    {
+      "round": "7 deposit 10 (DemoDeposit)",
+      "trigger": {
+        "tx": "0x8629f30fab4057462596d02fccc5e84e918eedc2a26cdba9755ae60130b86b64",
+        "block": 63370760,
+        "timestamp": 1795596020
+      },
+      "reactive": {
+        "tx": "0x07a3a42eea5cbc3ceea92d72171f732e808ce9a45a0c0e8642f75e33daa01ed0",
+        "block": 9204466,
+        "timestamp": 1795596020
+      },
+      "callback": {
+        "tx": "0xcdf9c104a6aedc3bdf2bff56ad00db98e86de989ed2c9e0d999413782608cc73",
+        "block": 63370766,
+        "timestamp": 1795596022,
+        "withdrawnWei": 10000000000000000000,
+        "remainingShares": 910000000000000000000000000,
+        "feePaidWei": 929854200000,
+        "gasUsed": 122629
+      },
+      "baseBlocks": 6,
+      "chainSeconds": 2,
+      "wallClock": {
+        "triggerSeenToCallbackSeenSec": 3.2,
+        "source": "the run's console log"
+      }
+    },
+    {
+      "round": "8 repay 10",
+      "trigger": {
+        "tx": "0x01c5e0094358cc3b795610563dd7715cc069f080ffea361979397557cff246a7",
+        "block": 63370837,
+        "timestamp": 1795596036
+      },
+      "reactive": {
+        "tx": "0x05d28f7098fe61f8e84c8a431ab3fb74fe73e3d7a4093536bbaa92259d97b324",
+        "block": 9204480,
+        "timestamp": 1795596035
+      },
+      "callback": {
+        "tx": "0x16954f414fc64f0f104af2fdda1ab2de5514b387dc22760c1eed66340519d560",
+        "block": 63370842,
+        "timestamp": 1795596037,
+        "withdrawnWei": 10000000000000000000,
+        "remainingShares": 900000000000000000000000000,
+        "feePaidWei": 929854200000,
+        "gasUsed": 122629
+      },
+      "baseBlocks": 5,
+      "chainSeconds": 1,
+      "wallClock": {
+        "triggerSeenToCallbackSeenSec": 3.5,
+        "source": "the run's console log"
+      }
+    },
+    {
+      "round": "9 deposit 10 (DemoDeposit)",
+      "trigger": {
+        "tx": "0x40657e665c9d9a72215ebbc9960409cf2c30bd9080133f0556bd44ec0fd554fd",
+        "block": 63370913,
+        "timestamp": 1795596051
+      },
+      "reactive": {
+        "tx": "0x35bd4ac057e92bcb811ac563a168831892915a8cb21770c9a38e2e223c82b9a9",
+        "block": 9204494,
+        "timestamp": 1795596050
+      },
+      "callback": {
+        "tx": "0x0d699db417226ac525199fa37af589728f8d91295b40180507ecd82ed7a919fb",
+        "block": 63370918,
+        "timestamp": 1795596052,
+        "withdrawnWei": 10000000000000000000,
+        "remainingShares": 890000000000000000000000000,
+        "feePaidWei": 929854200000,
+        "gasUsed": 122629
+      },
+      "baseBlocks": 5,
+      "chainSeconds": 1,
+      "wallClock": {
+        "triggerSeenToCallbackSeenSec": 2.6,
+        "source": "the run's console log"
+      }
+    },
+    {
+      "round": "10 repay 10",
+      "trigger": {
+        "tx": "0x74d769adb9fed1a4489d112a755bb93fd983fc22fd7e1c54999d3a3bfece0a8e",
+        "block": 63370985,
+        "timestamp": 1795596065
+      },
+      "reactive": {
+        "tx": "0x7e76cde97b10414bf7a66643607c92e7b510300dc56128cb1e21da8aedcb038d",
+        "block": 9204507,
+        "timestamp": 1795596065
+      },
+      "callback": {
+        "tx": "0xccd8c993e1c20d975dd45a545db95e7cb5df4568368ef04b1255b11f179bcf68",
+        "block": 63370991,
+        "timestamp": 1795596067,
+        "withdrawnWei": 10000000000000000000,
+        "remainingShares": 880000000000000000000000000,
+        "feePaidWei": 929854200000,
+        "gasUsed": 122629
+      },
+      "baseBlocks": 6,
+      "chainSeconds": 2,
+      "wallClock": {
+        "triggerSeenToCallbackSeenSec": 2.8,
+        "source": "the run's console log"
+      }
+    },
+    {
+      "round": "11 deposit 10 (DemoDeposit)",
+      "trigger": {
+        "tx": "0xc9bff58d67c4d71e1894f06c8b8d2e508fdd0c7f610d959c602da5525cb585a1",
+        "block": 63371057,
+        "timestamp": 1795596080
+      },
+      "reactive": {
+        "tx": "0x4748b8d75b37104aeff027bc0c6aaf22bd7366507a7aa2dd817fdef328d991f1",
+        "block": 9204520,
+        "timestamp": 1795596079
+      },
+      "callback": {
+        "tx": "0xf06bbe4ffdfb6534a6fb64101e268aec1c35ca677af3807a8a1b5ca5bc6bf31f",
+        "block": 63371065,
+        "timestamp": 1795596081,
+        "withdrawnWei": 10000000000000000000,
+        "remainingShares": 870000000000000000000000000,
+        "feePaidWei": 929854200000,
+        "gasUsed": 122629
+      },
+      "baseBlocks": 8,
+      "chainSeconds": 1,
+      "wallClock": {
+        "triggerSeenToCallbackSeenSec": 3.0,
+        "source": "the run's console log"
+      }
+    },
+    {
+      "round": "12 repay 10",
+      "trigger": {
+        "tx": "0x7fccc0e3f5a7347c777a10b8af351937b57907e04382b2ed81c9303c15873edc",
+        "block": 63371131,
+        "timestamp": 1795596095
+      },
+      "reactive": {
+        "tx": "0xa09a54b3d3e67f6392e79d050bf336f938fd8ab6a8611a70d8011ef4bed16e5e",
+        "block": 9204533,
+        "timestamp": 1795596094
+      },
+      "callback": {
+        "tx": "0xefed2fe763f987efe64380fe2652e40520abd3aa45429fb8e019c7d2cc4cd991",
+        "block": 63371138,
+        "timestamp": 1795596096,
+        "withdrawnWei": 10000000000000000000,
+        "remainingShares": 860000000000000000000000000,
+        "feePaidWei": 929854200000,
+        "gasUsed": 122629
+      },
+      "baseBlocks": 7,
+      "chainSeconds": 1,
+      "wallClock": {
+        "triggerSeenToCallbackSeenSec": 2.5,
+        "source": "the run's console log"
+      }
+    },
+    {
+      "round": "13 deposit 10 (DemoDeposit)",
+      "trigger": {
+        "tx": "0x4fbdb3f5f0aa3be52d64f33b54efcbe812bf2c60a6a4e72602e3c2721f30efe7",
+        "block": 63371201,
+        "timestamp": 1795596109
+      },
+      "reactive": {
+        "tx": "0xb3d662ae33481f3d04109909b32393f1e1684f52e5d9101377e79294531131e2",
+        "block": 9204545,
+        "timestamp": 1795596108
+      },
+      "callback": {
+        "tx": "0x4ffe78327c344df5c7af4840b4ec6ccb9f4d6483af20c774c8b252d95e7a82a7",
+        "block": 63371206,
+        "timestamp": 1795596110,
+        "withdrawnWei": 10000000000000000000,
+        "remainingShares": 850000000000000000000000000,
+        "feePaidWei": 929854200000,
+        "gasUsed": 122629
+      },
+      "baseBlocks": 5,
+      "chainSeconds": 1,
+      "wallClock": {
+        "triggerSeenToCallbackSeenSec": 3.1,
+        "source": "the run's console log"
+      }
+    },
+    {
+      "round": "14 repay 10",
+      "trigger": {
+        "tx": "0x235329cd5fd745de3acdb1821eb36dda376138ebe8180cad79648f9fbe1ec409",
+        "block": 63371274,
+        "timestamp": 1795596123
+      },
+      "reactive": {
+        "tx": "0x916a4047724725dd6853f4d0a897875f23dac9b11510d4cd0c100375a71c2a9e",
+        "block": 9204558,
+        "timestamp": 1795596122
+      },
+      "callback": {
+        "tx": "0xcf128e57e41917497266d7cdb30d805f3e30e4c8ff0c7189750c8180c4f57aa1",
+        "block": 63371279,
+        "timestamp": 1795596124,
+        "withdrawnWei": 10000000000000000000,
+        "remainingShares": 840000000000000000000000000,
+        "feePaidWei": 930030167863,
+        "gasUsed": 122629
+      },
+      "baseBlocks": 5,
+      "chainSeconds": 1,
+      "wallClock": {
+        "triggerSeenToCallbackSeenSec": 3.3,
+        "source": "the run's console log"
+      }
+    },
+    {
+      "round": "15 deposit 10 (DemoDeposit)",
+      "trigger": {
+        "tx": "0x5f164c363f11eb5e2f2f10336862f26f626a5caa938e9e0964e95f965df48793",
+        "block": 63371348,
+        "timestamp": 1795596138
+      },
+      "reactive": {
+        "tx": "0x3dc2f2fd5c4038ee809b4f98177cc8836fe8f2612e28297879e9cdf95a7cc712",
+        "block": 9204571,
+        "timestamp": 1795596137
+      },
+      "callback": {
+        "tx": "0x4dcc3570ddb8ca73975c4a4011153ad74d350ecdacda1fdf5621a65e5be98df3",
+        "block": 63371352,
+        "timestamp": 1795596139,
+        "withdrawnWei": 10000000000000000000,
+        "remainingShares": 830000000000000000000000000,
+        "feePaidWei": 929854200000,
+        "gasUsed": 122629
+      },
+      "baseBlocks": 4,
+      "chainSeconds": 1,
+      "wallClock": {
+        "triggerSeenToCallbackSeenSec": 2.7,
+        "source": "the run's console log"
+      }
+    },
+    {
+      "round": "16 repay 10",
+      "trigger": {
+        "tx": "0x00f54907f78ca30c63532f1be6e7914c7548757a8e7aa48fdde0c0c98b6384a0",
+        "block": 63371420,
+        "timestamp": 1795596152
+      },
+      "reactive": {
+        "tx": "0xe4a77f3f69be6185b33b8e80d438dde35220707e5c547220368c9fee6dd40ece",
+        "block": 9204585,
+        "timestamp": 1795596152
+      },
+      "callback": {
+        "tx": "0x18c15d21cc3f9cfe3f3b3f8b8c0c7a05c002ab0d108719f342f7a60f249fc543",
+        "block": 63371427,
+        "timestamp": 1795596154,
+        "withdrawnWei": 10000000000000000000,
+        "remainingShares": 820000000000000000000000000,
+        "feePaidWei": 929854200000,
+        "gasUsed": 122629
+      },
+      "baseBlocks": 7,
+      "chainSeconds": 2,
+      "wallClock": {
+        "triggerSeenToCallbackSeenSec": 2.9,
+        "source": "the run's console log"
+      }
+    },
+    {
+      "round": "17 deposit 10 (DemoDeposit)",
+      "trigger": {
+        "tx": "0x8cbe374209750375483f9178f127aa3a14c901006f072a26f4379e48aa4bac6e",
+        "block": 63371493,
+        "timestamp": 1795596167
+      },
+      "reactive": {
+        "tx": "0x11cf23921b411699de1107c32586c3017e64bb378be5d861ce35483db312842d",
+        "block": 9204599,
+        "timestamp": 1795596167
+      },
+      "callback": {
+        "tx": "0x7d58add0c5f8a127b5a240229d3e447b4ede147027d226f90ddf486fe99eccfe",
+        "block": 63371501,
+        "timestamp": 1795596169,
+        "withdrawnWei": 10000000000000000000,
+        "remainingShares": 810000000000000000000000000,
+        "feePaidWei": 929854200000,
+        "gasUsed": 122629
+      },
+      "baseBlocks": 8,
+      "chainSeconds": 2,
+      "wallClock": {
+        "triggerSeenToCallbackSeenSec": 3.6,
+        "source": "the run's console log"
+      }
+    },
+    {
+      "round": "18 repay 10",
+      "trigger": {
+        "tx": "0x62c000e82a31758bd41b485966e45e2f9cf3f148354562e9eb2286fa58dc2483",
+        "block": 63371570,
+        "timestamp": 1795596182
+      },
+      "reactive": {
+        "tx": "0x26fb042a85f54edc87cc46b5b7566700d72fd6a8c7d66dc3f58a044aa61ca6e6",
+        "block": 9204613,
+        "timestamp": 1795596182
+      },
+      "callback": {
+        "tx": "0x0aa0b07aa01c24c58897ff2090c07d53d49a869ef63eab805996599fa97d7ff6",
+        "block": 63371576,
+        "timestamp": 1795596184,
+        "withdrawnWei": 10000000000000000000,
+        "remainingShares": 800000000000000000000000000,
+        "feePaidWei": 929854200000,
+        "gasUsed": 122629
+      },
+      "baseBlocks": 6,
+      "chainSeconds": 2,
+      "wallClock": {
+        "triggerSeenToCallbackSeenSec": 3.2,
+        "source": "the run's console log"
+      }
+    },
+    {
+      "round": "19 deposit 10 (DemoDeposit)",
+      "trigger": {
+        "tx": "0xee25799edcff539730bb47834fc58323608ce2ef0ec3c7f2fed6544d5f43356c",
+        "block": 63371641,
+        "timestamp": 1795596197
+      },
+      "reactive": {
+        "tx": "0xb567418d4865a7ebb7ebe74e6072927bdd39773a27859fcf897eece0c3bcea23",
+        "block": 9204626,
+        "timestamp": 1795596196
+      },
+      "callback": {
+        "tx": "0x64808cca2ca33e6e715b443b6f6caa54008416166c496989a465e30104aa6070",
+        "block": 63371645,
+        "timestamp": 1795596197,
+        "withdrawnWei": 10000000000000000000,
+        "remainingShares": 790000000000000000000000000,
+        "feePaidWei": 909275400000,
+        "gasUsed": 119511
+      },
+      "baseBlocks": 4,
+      "chainSeconds": 0,
+      "wallClock": {
+        "triggerSeenToCallbackSeenSec": 2.8,
+        "source": "the run's console log"
+      }
+    },
+    {
+      "round": "20 repay 10",
+      "trigger": {
+        "tx": "0x5a60cf65ef3cda894e0bebf4184ad2e32a1a919faa973ab868be964cfcb66777",
+        "block": 63371712,
+        "timestamp": 1795596211
+      },
+      "reactive": {
+        "tx": "0xa050d128e4e9ab11a7136af75709010a5182b5a4156704457b1b576b374b4760",
+        "block": 9204640,
+        "timestamp": 1795596211
+      },
+      "callback": {
+        "tx": "0xcb18cf39560e3b18349d0bcac09dea2633f8d474fc1b4121f63782861c1a0782",
+        "block": 63371720,
+        "timestamp": 1795596212,
+        "withdrawnWei": 10000000000000000000,
+        "remainingShares": 780000000000000000000000000,
+        "feePaidWei": 929854200000,
+        "gasUsed": 122629
+      },
+      "baseBlocks": 8,
+      "chainSeconds": 1,
+      "wallClock": {
+        "triggerSeenToCallbackSeenSec": 4.6,
+        "source": "the run's console log"
+      }
+    }
+  ],
+  "earlierRounds": [
+    {
+      "round": "exit request (demo re-armed)",
+      "trigger": {
+        "tx": "0xf71c214e1b4c2e26d53f0e7420ce1182a7253bc72aa9b85be84aab0b05bdec73",
+        "block": 63089516,
+        "timestamp": 1795539772
+      },
+      "callback": {
+        "tx": "0x22a1c56a271d6cf810903de7d67463e6f7652d5e73c3b50bdee58a2854315185",
+        "block": 63089520,
+        "timestamp": 1795539772,
+        "withdrawnWei": 0
+      },
+      "baseBlocks": 4,
+      "chainSeconds": 0
+    },
+    {
+      "round": "deposit 10 (page followed it)",
+      "trigger": {
+        "tx": "0x0c6507b5c512c57f6b56ca7504b331bda43c2be03a9ae0aed9f616165873e6c2",
+        "block": 63092698,
+        "timestamp": 1795540408
+      },
+      "callback": {
+        "tx": "0x94cd802ae8c8b9425a76fe523b2b3c0ca34ece8576494dd3a193a21a212cbdd1",
+        "block": 63092706,
+        "timestamp": 1795540410,
+        "withdrawnWei": 10000000000000000000
+      },
+      "baseBlocks": 8,
+      "chainSeconds": 2
+    },
+    {
+      "round": "deposit 10 (demo video, from the page)",
+      "trigger": {
+        "tx": "0x21355fc5b20643b691bbc830ab67221f7e1b52c3cd6aedcd65778aa5c0685563",
+        "block": 63338193,
+        "timestamp": 1795589507
+      },
+      "callback": {
+        "tx": "0x3cdd300a9c1fbac2636d5fef7b2708e64f85bfd020f5c18c21c28cfbff4eb3c4",
+        "block": 63338198,
+        "timestamp": 1795589508,
+        "withdrawnWei": 10000000000000000000
+      },
+      "baseBlocks": 5,
+      "chainSeconds": 1
+    }
+  ],
+  "earlierEvidence": "evidence/race-2026-11-24.json",
+  "summary": {
+    "newRounds": {
+      "n": 20,
+      "min": 4,
+      "median": 6,
+      "p95": 8,
+      "max": 8,
+      "chainSeconds": {
+        "n": 20,
+        "min": 0,
+        "median": 1,
+        "p95": 2,
+        "max": 2
+      }
+    },
+    "allRounds": {
+      "baseBlocks": {
+        "n": 30,
+        "min": 3,
+        "median": 5,
+        "p95": 8,
+        "max": 8
+      },
+      "baseSecondsAt0_2sPerBlock": {
+        "min": 0.6,
+        "median": 1.0,
+        "p95": 1.6,
+        "max": 1.6
+      },
+      "chainSeconds": {
+        "n": 30,
+        "min": 0,
+        "median": 1,
+        "p95": 2,
+        "max": 2
+      }
+    },
+    "withdrawalsOnly": {
+      "baseBlocks": {
+        "n": 28,
+        "min": 3,
+        "median": 5,
+        "p95": 8,
+        "max": 8
+      }
+    },
+    "withdrawnThisRunWei": 200000000000000000000,
+    "walletSharesLeft": 780000000000000000000000000,
+    "errandArmedAfter": true
+  }
+}
