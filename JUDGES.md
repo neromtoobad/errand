@@ -30,7 +30,7 @@ finalized our request yet).
 ETHEREUM_RPC_URL=https://ethereum-rpc.publicnode.com BASE_SEPOLIA_RPC_URL=https://sepolia.base.org forge test
 ```
 
-41 tests. 10 run on an Ethereum mainnet fork against Lido's real queue, and 8 on a Base Sepolia fork
+42 tests. 10 run on an Ethereum mainnet fork against Lido's real queue, and 9 on a Base Sepolia fork
 against real Morpho Blue, with real EIP-7702 delegations. CI runs the same command on every push.
 
 ## 3. Read (the 4 files that matter, about 590 lines in all)
@@ -53,15 +53,17 @@ Tested in `test_rejectsErrandsFromOtherReactiveContracts` and `test_onlyTheProxy
 
 **What is the worst a forged callback could do?**
 Claim the wallet's own finalized Lido requests to the wallet, or withdraw the wallet's own Morpho
-position to the wallet, which is what the owner asked for anyway. Fees are capped per payment. The
-delegated code has no path that sends funds anywhere else. See [Trust model](README.md#trust-model--limitations).
+position to the wallet, which is what the owner asked for anyway. The delegated code has no path that
+sends funds anywhere else, except fees to Reactive's callback proxy. Those are capped per payment but not
+in total, and the proxy alone decides how many to ask for. We say so in the
+[Trust model](README.md#trust-model--limitations).
 
 **How was the latency measured?**
 For each round, the Base block of the trigger and the Base block of the callback, both read from the
 chain. Base Sepolia makes a block every 0.2 s, and its timestamps only have whole seconds, so the
 README gives both: timestamp Δ of 1 s every time, and 3–8 blocks (0.6–1.6 s). The 7 scripted rounds
-are in [evidence/race-2026-11-24.json](evidence/race-2026-11-24.json); the live page reads every round,
-including the ones visitors started.
+are in [evidence/race-2026-11-24.json](evidence/race-2026-11-24.json). Two more ran after we re-armed
+the demo, both sent by us. The live page reads every round, so a judge's own round shows up there too.
 
 **Why EIP-7702 and not a vault?**
 A vault means moving your funds into someone else's contract. With 7702 the address, key and balance

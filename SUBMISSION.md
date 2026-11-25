@@ -34,9 +34,11 @@ With Errand, the lender signs one EIP-7702 authorization and asks to exit once. 
 It repeats on every repay or deposit until the lender is fully out, then stands down by itself.
 
 **Measured latency (full loop, onchain):** across 9 rounds, the callback landed 3–8 Base blocks
-after the trigger (0.6–1.6 s, median 1.0 s). In the 7 scripted rounds the block timestamp moved by 1 s every time. Those 7 were
-scripted ([evidence/race-2026-11-24.json](https://github.com/neromtoobad/errand/blob/main/evidence/race-2026-11-24.json)),
-and 2 were started from the live page. Each round links its trigger, reactive and callback txs.
+after the trigger (0.6–1.6 s, median 1.0 s). In the 7 scripted rounds
+([evidence/race-2026-11-24.json](https://github.com/neromtoobad/errand/blob/main/evidence/race-2026-11-24.json))
+the block timestamp moved by 1 s every time. We ran 2 more after re-arming the demo for the live page: an
+exit request, and a deposit the page followed live. All 9 were sent by us; the page shows any round a
+visitor runs. Each round links its trigger, reactive and callback txs.
 
 **Try it:** at errand.nerom.site, deposit 5–50 test tUSD (one transaction on Base Sepolia) and time how
 fast the lender's wallet takes it back.
@@ -50,14 +52,15 @@ keeper holds the key, and no server polls.
 | Contract | Chain | Address |
 |---|---|---|
 | ErrandMorpho (reactive) | Lasna 5318007 | [0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651](https://lasna.reactscan.net/address/0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651) (Sourcify verified) |
-| ErrandMorphoWallet (7702 code) | Base Sepolia | [0x0D671866021CE29099F9aEc9bfF2d93D6C155CBe](https://base-sepolia.blockscout.com/address/0x0D671866021CE29099F9aEc9bfF2d93D6C155CBe) |
+| ErrandMorphoWallet (7702 code) | Base Sepolia | [0x0D671866021CE29099F9aEc9bfF2d93D6C155CBe](https://base-sepolia.blockscout.com/address/0x0D671866021CE29099F9aEc9bfF2d93D6C155CBe) (Sourcify verified) |
+| DemoDeposit (the page's deposit button) | Base Sepolia | [0x6D05eac4aDEA141AC9fa39fED6C1Bc896873F648](https://base-sepolia.blockscout.com/address/0x6D05eac4aDEA141AC9fa39fED6C1Bc896873F648) (Sourcify verified) |
 | Lender wallet (delegated) | Base Sepolia | [0x529d216723506E3390c9c6832b86fd78A805d4EC](https://base-sepolia.blockscout.com/address/0x529d216723506E3390c9c6832b86fd78A805d4EC) |
 | Morpho Blue (real) | Base Sepolia | 0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb |
 
 **Full loop tx hashes (origin → reactive → callback)**
 - repay 10: [0x02df3310…](https://base-sepolia.blockscout.com/tx/0x02df331060a1e727429d94a3ac4c545f2ce6865f6ad5c13f41afafdf6e73c69b) → [0x22c12746…](https://lasna.reactscan.net/tx/0x22c127463641ef5c660c25912e2a99748c133bc0ce8c2cd5ba58472773712811) → [0xa71e9fd0…](https://base-sepolia.blockscout.com/tx/0xa71e9fd069d2554ee539e42ddb01800c8e056c81a4ccf9b147349abbfeeefcf5) (3 blocks)
 - repay rest, wallet fully out: [0x7e760c45…](https://base-sepolia.blockscout.com/tx/0x7e760c453b31325e430f5e938bb462b691a4906f030c00c55bbf9abbd8997262) → [0x7fe2c770…](https://lasna.reactscan.net/tx/0x7fe2c770033386be8ade5c1ba8ce3b558157e31f1700e82a43473821aa5c00cb) → [0xdcb45497…](https://base-sepolia.blockscout.com/tx/0xdcb454971c5215e04d576be777ae40cff19db41da2080b618707ab64d1b9ed89) (5 blocks)
-- deposit from the live page (round #9): [0x0c6507b5…](https://base-sepolia.blockscout.com/tx/0x0c6507b5c512c57f6b56ca7504b331bda43c2be03a9ae0aed9f616165873e6c2) → [0xdcecb908…](https://lasna.reactscan.net/tx/0xdcecb9089f651a65cd861b03894a9a2c0900215566379304e64b510f57c2a834) → [0x94cd802a…](https://base-sepolia.blockscout.com/tx/0x94cd802ae8c8b9425a76fe523b2b3c0ca34ece8576494dd3a193a21a212cbdd1) (8 blocks)
+- deposit followed by the live page (round #9, sent by us): [0x0c6507b5…](https://base-sepolia.blockscout.com/tx/0x0c6507b5c512c57f6b56ca7504b331bda43c2be03a9ae0aed9f616165873e6c2) → [0xdcecb908…](https://lasna.reactscan.net/tx/0xdcecb9089f651a65cd861b03894a9a2c0900215566379304e64b510f57c2a834) → [0x94cd802a…](https://base-sepolia.blockscout.com/tx/0x94cd802ae8c8b9425a76fe523b2b3c0ca34ece8576494dd3a193a21a212cbdd1) (8 blocks)
 - All rounds: the [latency table in the README](https://github.com/neromtoobad/errand#latency-measured-on-base-sepolia) and the live page.
 
 **What's test-only:** tUSD, tETH and the 1:1 price oracle are stand-ins we deployed. The market built
