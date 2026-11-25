@@ -19,7 +19,8 @@ Two errands are built:
 - **Morpho exit:** the full loop ran 7 times on Base Sepolia and Lasna, with every transaction linked [below](#latency-measured-on-base-sepolia). [ErrandMorpho on Lasna](https://lasna.reactscan.net/address/0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651) is verified ([Sourcify](https://repo.sourcify.dev/5318007/0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651)). The wallet got all 100 tUSD out of a fully borrowed market, and then Errand switched itself off.
 - **Lido claim:**
   - Live: the reactive contract is on Reactive mainnet and its source is verified ([ErrandLido on Reactscan](https://reactscan.net/address/0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651), [deploy tx](https://reactscan.net/tx/0xbde3b9c8503df076eb9f883ac82b19314ab772f650d997a76c524308d5905c6b), [Sourcify exact match](https://repo.sourcify.dev/1597/0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651)).
-  - Waiting: the Ethereum side is waiting for cheap gas (see [What's real](#whats-real)).
+  - Live: the wallet is delegated to ErrandWallet on Ethereum ([delegation tx](https://etherscan.io/tx/0x4c2d10d363da3b30f678e126e20b7b02ba2549856e457991c1d3cc37124a4910)) and has a real Lido withdrawal request (#142667) that ErrandLido is tracking.
+  - Waiting: the first real claim, which fires once Lido finalizes that request (see [What's real](#whats-real)).
   - Tested: the full loop already runs in CI, against real Lido data on a mainnet fork.
 
 The two reactive contracts have the same address on two different networks, Reactive mainnet and Lasna.
@@ -31,7 +32,7 @@ No wallet, key or `.env` needed. You need [Foundry](https://getfoundry.sh) and p
 
 | Do this | You see |
 |---|---|
-| `./tools/check-live.sh` | PASS / FAIL / WAIT for every onchain claim in this README, read live from Reactive mainnet, Lasna, Ethereum, Base Sepolia and Sourcify (today: 19 pass, 0 fail, 2 waiting) |
+| `./tools/check-live.sh` | PASS / FAIL / WAIT for every onchain claim in this README, read live from Reactive mainnet, Lasna, Ethereum, Base Sepolia and Sourcify (today: 23 pass, 0 fail, 1 waiting: Lido hasn't finalized our request yet) |
 | `ETHEREUM_RPC_URL=https://ethereum-rpc.publicnode.com BASE_SEPOLIA_RPC_URL=https://sepolia.base.org forge test` | 41 tests pass. 10 run on an Ethereum mainnet fork against Lido's real queue, and 8 on a Base Sepolia fork against real Morpho Blue, all with real EIP-7702 delegations. Without the RPC variables, the fork tests are skipped |
 | `ETHEREUM_RPC_URL=https://ethereum-rpc.publicnode.com forge test --mt test_fullLoop_reactive -vvv` | Lido events go into the real `ErrandLido`, and its callback payload claims a real finalized request on Ethereum for exactly the ETH Lido owes |
 | [errand.nerom.site](https://errand.nerom.site) | The lender's live position, Errand's status, and every round read from Lasna and Base Sepolia. With a browser wallet and a little Base Sepolia ETH you can run a round yourself |
@@ -207,10 +208,10 @@ competes with every other lender in the market. A keeper would need the key or a
 
 | Criterion (quoted from the event page) | Where we meet it |
 |---|---|
-| **Execution:** "Does it run? We want to see the reactive transactions and the callbacks they trigger on-chain." | Morpho exit: 7 full loops onchain, each with the trigger tx, Lasna reactive tx and Base callback tx linked in the [latency table](#latency-measured-on-base-sepolia). Lido claim: ErrandLido is live on Reactive mainnet. Its Ethereum side and first real claim are pending ([What's real](#whats-real)) |
+| **Execution:** "Does it run? We want to see the reactive transactions and the callbacks they trigger on-chain." | Morpho exit: 7 full loops onchain, each with the trigger tx, Lasna reactive tx and Base callback tx linked in the [latency table](#latency-measured-on-base-sepolia). Lido claim: ErrandLido is live on Reactive mainnet, the wallet is delegated on Ethereum, and ErrandLido picked up its real Lido request ([Tracking event](https://reactscan.net/tx/0x07116c760fe004f14a6c50defcc2effc6179aff81666b26372910e9f72ca0415)). The first claim waits for Lido to finalize it ([What's real](#whats-real)) |
 | **Integration:** "Does the reactive contract do real work, or is it bolted on?" | The reactive contracts hold the state and decide when to act. ErrandLido tracks the wallet's requests, waits for finalization and batches the claims ([`src/ErrandLido.sol:72`](src/ErrandLido.sol#L72-L94)). ErrandMorpho arms on request, fires on every repay or deposit, and stands down when the wallet is out ([`src/ErrandMorpho.sol:75`](src/ErrandMorpho.sol#L75-L95)). Without them, nothing knows when to act |
 | **Usefulness:** "Does it solve a problem real users have?" | 37,306 ETH is finalized but unclaimed in Lido's queue right now ([measured](#the-problem)). Lenders in a fully borrowed market can't withdraw until someone repays, and then they race for it |
-| **Craft:** "Readable code, a working demo, and documentation someone else could follow." | Four small contracts, 41 tests (18 on mainnet and Base Sepolia forks), claims tables with file:line, `./tools/check-live.sh` (19 PASS) and the race evidence file |
+| **Craft:** "Readable code, a working demo, and documentation someone else could follow." | Four small contracts, 41 tests (18 on mainnet and Base Sepolia forks), claims tables with file:line, `./tools/check-live.sh` (23 PASS) and the race evidence file |
 | **Set It and Forget It:** "a tool you'd actually keep running", "a clear personal purpose" | Turn it on once. After that, each Lido withdrawal the wallet makes is claimed without the owner |
 | **Every Second Counts:** "withdrawal queues that settle the moment they can", "latency numbers for the full loop" | The lender's withdrawal lands 3–6 Base blocks (0.6–1.2 s) after each repay, with timestamps and tx links for all 7 rounds ([latency](#latency-measured-on-base-sepolia)) |
 
@@ -219,8 +220,9 @@ competes with every other lender in the market. A keeper would need the key or a
 | Part | Status | Proof |
 |---|---|---|
 | `ErrandLido` | **live on Reactive mainnet**, source verified | [0x6fBf…6651](https://reactscan.net/address/0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651) · [deploy tx](https://reactscan.net/tx/0xbde3b9c8503df076eb9f883ac82b19314ab772f650d997a76c524308d5905c6b) · [Sourcify](https://repo.sourcify.dev/1597/0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651) |
-| `ErrandWallet` + 7702 delegation on Ethereum | **waiting for cheap gas** | The project wallet has 0.00049 ETH. [script/when-gas-is-cheap.sh](script/when-gas-is-cheap.sh) deploys when the base fee is ≤ 0.12 gwei. A rehearsal on a mainnet fork with that exact balance passed |
-| A real Lido request claimed by Errand on mainnet | **not yet** | It follows the step above, after Lido finalizes the request (Lido finalizes about once a day) |
+| `ErrandWallet` + 7702 delegation on Ethereum | **live**, source verified | [0x08e2…9f05](https://etherscan.io/address/0x08e2A31B676214E306F78aF5Ad1Aa3883eDe9f05) · [deploy tx](https://etherscan.io/tx/0xa04feebfafe7a059d711c44c23b84b8fa6b942c25db40fc578a60f999ca7dbd5) · [delegation tx](https://etherscan.io/tx/0x4c2d10d363da3b30f678e126e20b7b02ba2549856e457991c1d3cc37124a4910) · [Sourcify](https://repo.sourcify.dev/1/0x08e2A31B676214E306F78aF5Ad1Aa3883eDe9f05). Sent by [script/when-gas-is-cheap.sh](script/when-gas-is-cheap.sh) at a 0.07 gwei base fee, because the wallet only had 0.00049 ETH |
+| A real Lido request, tracked by ErrandLido | **live** | Request #142667 for 0.000299 ETH: [stake tx](https://etherscan.io/tx/0xb21c8115f5cd7acedf44e41fe61c141bd3da962fcf1edd9153d0979395c2e8be) · [request tx](https://etherscan.io/tx/0xf2687d9ff17d8e2c465539feb09f233fc094416bef4a1ee0a62c1efd848cb237) · [ErrandLido's Tracking event](https://reactscan.net/tx/0x07116c760fe004f14a6c50defcc2effc6179aff81666b26372910e9f72ca0415) |
+| That request claimed by Errand on mainnet | **not yet** | Fires when Lido finalizes request #142667 (Lido finalizes about once a day; on Nov 25 its queue was finalized up to #142469) |
 | Full loop on a mainnet fork | real Lido queue, real 7702 delegation, simulated delivery | The fork test calls the wallet as the proxy, with the payload ErrandLido produced. Reactive's sender injection is reproduced in [`test/ErrandWallet.fork.t.sol:207`](test/ErrandWallet.fork.t.sol#L207-L211) |
 | `ErrandMorpho` | **live on Lasna testnet**, source verified | [0x6fBf…6651 on Lasna](https://lasna.reactscan.net/address/0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651) · [deploy tx](https://lasna.reactscan.net/tx/0xac1ae838e16484f14f66c3a1f5489c4750d16b84e2ede146031671695127957b) · [Sourcify](https://repo.sourcify.dev/5318007/0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651) |
 | `ErrandMorphoWallet` + 7702 delegation on Base Sepolia | **live** | [code](https://base-sepolia.blockscout.com/address/0x0D671866021CE29099F9aEc9bfF2d93D6C155CBe) · [delegation tx](https://base-sepolia.blockscout.com/tx/0xe871ea1446af4546c39cc31ac37887c196caa8f316f023582780852ced597dba) |
@@ -229,7 +231,7 @@ competes with every other lender in the market. A keeper would need the key or a
 | tUSD, tETH and the price oracle | **testnet stand-ins we deployed**: open-mint tokens and a fixed 1:1 price | [src/testnet/](src/testnet/), marked testnet-only in the source. Morpho markets are permissionless, so the market is a real one built on them |
 | Reactive's system contract in unit tests | simulated: a mock records subscriptions and callbacks | [test/mocks/MockSystem.sol](test/mocks/MockSystem.sol) |
 
-All addresses are in [deployments/mainnet.json](deployments/mainnet.json) and [deployments/testnet.json](deployments/testnet.json). The mainnet table and file get the Ethereum addresses and the claim transaction as soon as they exist.
+All addresses are in [deployments/mainnet.json](deployments/mainnet.json) and [deployments/testnet.json](deployments/testnet.json). The claim transaction is added here as soon as it lands.
 
 ## Why this needs Reactive Network
 
