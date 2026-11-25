@@ -5,5 +5,19 @@
     "ErrandLido": "0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651",
     "deployTx": "0xbde3b9c8503df076eb9f883ac82b19314ab772f650d997a76c524308d5905c6b",
     "lastFinalizedAtSetup": 142469
+  },
+  "ethereum": {
+    "chainId": 1,
+    "ErrandWallet": "0x08e2A31B676214E306F78aF5Ad1Aa3883eDe9f05",
+    "deployTx": "0xa04feebfafe7a059d711c44c23b84b8fa6b942c25db40fc578a60f999ca7dbd5",
+    "lidoQueue": "0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1",
+    "callbackProxy": "0xFCE1F192F489c988392aBC16E91e359d540d94Fe",
+    "delegationTx": "0x4c2d10d363da3b30f678e126e20b7b02ba2549856e457991c1d3cc37124a4910"
+  },
+  "lido": {
+    "requestId": 142667,
+    "stakeTx": "0xb21c8115f5cd7acedf44e41fe61c141bd3da962fcf1edd9153d0979395c2e8be",
+    "requestTx": "0xf2687d9ff17d8e2c465539feb09f233fc094416bef4a1ee0a62c1efd848cb237",
+    "amountWei": 299430188851041
   }
 }
