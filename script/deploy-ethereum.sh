@@ -23,7 +23,8 @@ record ethereum.lidoQueue "$QUEUE"
 record ethereum.callbackProxy "$PROXY"
 
 echo "Delegating the wallet to it (EIP-7702)…"
-AUTH_TX=$(cast send "$WALLET" --auth "$IMPL" --force $FEES --rpc-url "$ETH_RPC" --private-key "$KEY" --json | tx_of)
+# 7702 txs: some RPCs (drpc) underestimate gas for the authorization, so set it (uses ~37k).
+AUTH_TX=$(cast send "$WALLET" --auth "$IMPL" --force --gas-limit 80000 $FEES --rpc-url "$ETH_RPC" --private-key "$KEY" --json | tx_of)
 echo "   wallet code now $(cast code "$WALLET" -r "$ETH_RPC") ($AUTH_TX)"
 record ethereum.delegationTx "$AUTH_TX"
 
