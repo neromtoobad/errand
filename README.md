@@ -35,7 +35,7 @@ No wallet, key or `.env` needed. You need [Foundry](https://getfoundry.sh) and p
 | `./tools/check-live.sh` | PASS / FAIL / WAIT for every onchain claim in this README, read live from Reactive mainnet, Lasna, Ethereum, Base Sepolia and Sourcify (today: 24 pass, 0 fail, 1 waiting: Lido hasn't finalized our request yet) |
 | `ETHEREUM_RPC_URL=https://ethereum-rpc.publicnode.com BASE_SEPOLIA_RPC_URL=https://sepolia.base.org forge test` | 42 tests pass. 10 run on an Ethereum mainnet fork against Lido's real queue, and 9 on a Base Sepolia fork against real Morpho Blue, all with real EIP-7702 delegations. Without the RPC variables, the fork tests are skipped |
 | `ETHEREUM_RPC_URL=https://ethereum-rpc.publicnode.com forge test --mt test_fullLoop_reactive -vvv` | Lido events go into the real `ErrandLido`, and its callback payload claims a real finalized request on Ethereum for exactly the ETH Lido owes |
-| [errand.nerom.site](https://errand.nerom.site) | The lender's live position, Errand's status, and the latest 12 rounds, read from Lasna and Base Sepolia. With a browser wallet and a little Base Sepolia ETH you can run a round yourself |
+| [errand.nerom.site](https://errand.nerom.site) | The lender's live position, Errand's status, and every round with its median and p95, read from Lasna and Base Sepolia. With a browser wallet and a little Base Sepolia ETH you can run a round yourself |
 | [evidence/race-2026-11-24.json](evidence/race-2026-11-24.json) | The Morpho exit, live: 7 rounds of trigger tx → Lasna reactive tx → Base callback tx, with blocks, timestamps, amounts and fees |
 | [evidence/rounds-2026-11-25.json](evidence/rounds-2026-11-25.json) | 20 more rounds against the live demo, the same fields for each, plus min / median / p95 / max over all 30 |
 | `cast call 0x6fBf9C16ed3e75eDA1b5A8Cc600cbA25B1226651 "tracked()(uint256[])" -r https://mainnet-rpc.rnk.dev/` | The Lido requests the live contract is waiting on for the wallet |
@@ -216,8 +216,8 @@ All 30 loops, each timed from the trigger's Base block to the callback's:
 - The script's wall clock (trigger receipt seen → callback event seen, polling a public RPC) was 2.5–4.6 s
   in the 20 rounds, median 3.2 s. Most of that is RPC delay.
 - Each callback cost the wallet about 0.0000009 ETH in Reactive fees and 120–123k gas.
-- The [live page](https://errand.nerom.site) shows the latest 12 rounds and their median, read live from the
-  chains, so a visitor's round appears there too. Over just those 12 the median is higher (1.2 s on Nov 25).
+- The [live page](https://errand.nerom.site) reads every round from the chains and draws the same chart and
+  median (withdrawals only: 28 of the 30, median 1.0 s, p95 1.6 s), so a visitor's round appears there too.
 
 **Why this needs Omni:** the lender's own address withdraws within about a second of the event that
 freed the money. No bot holds the lender's key, and no server polls Morpho. A lender doing this by hand
@@ -245,7 +245,7 @@ competes with every other lender in the market. A keeper would need the key or a
 | **Usefulness:** "Does it solve a problem real users have?" | 37,306 ETH is finalized but unclaimed in Lido's queue right now ([measured](#the-problem)). Lenders in a fully borrowed market can't withdraw until someone repays, and then they race for it |
 | **Craft:** "Readable code, a working demo, and documentation someone else could follow." | Four small contracts, 42 tests (19 on mainnet and Base Sepolia forks), claims tables with file:line, `./tools/check-live.sh` (24 PASS) and two evidence files covering all 30 rounds |
 | **Set It and Forget It:** "a tool you'd actually keep running", "a clear personal purpose" | Turn it on once. After that, each Lido withdrawal the wallet makes is claimed without the owner |
-| **Every Second Counts:** "withdrawal queues that settle the moment they can", "latency numbers for the full loop" | The lender's withdrawal lands 3–8 Base blocks after each trigger over 30 rounds (0.6–1.6 s; median 1.0 s, p95 1.6 s), with timestamps and tx links for every round in [evidence/](evidence/), and the latest ones on the live page ([latency](#latency-measured-on-base-sepolia)) |
+| **Every Second Counts:** "withdrawal queues that settle the moment they can", "latency numbers for the full loop" | The lender's withdrawal lands 3–8 Base blocks after each trigger over 30 rounds (0.6–1.6 s; median 1.0 s, p95 1.6 s), with timestamps and tx links for every round in [evidence/](evidence/), and on the live page ([latency](#latency-measured-on-base-sepolia)) |
 
 ## What's real
 

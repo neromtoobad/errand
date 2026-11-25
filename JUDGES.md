@@ -11,7 +11,7 @@ You don't need a wallet, a key or an `.env` for anything below.
 
 | Open this | You see |
 |---|---|
-| [errand.nerom.site](https://errand.nerom.site) | A lender's money stuck in a fully borrowed Morpho market on Base Sepolia, Errand's status on Lasna, and the latest 12 rounds, each with its three transactions. Everything on the page is read from the chains in your browser. "Replay" replays the last real round from its block numbers and says so |
+| [errand.nerom.site](https://errand.nerom.site) | A lender's money stuck in a fully borrowed Morpho market on Base Sepolia, Errand's status on Lasna, and every round so far with its three transactions, median and p95. Everything on the page is read from the chains in your browser. "Replay" replays the last real round from its block numbers and says so |
 | [Round #9 trigger](https://base-sepolia.blockscout.com/tx/0x0c6507b5c512c57f6b56ca7504b331bda43c2be03a9ae0aed9f616165873e6c2) → [reactive tx on Lasna](https://lasna.reactscan.net/tx/0xdcecb9089f651a65cd861b03894a9a2c0900215566379304e64b510f57c2a834) → [callback on Base](https://base-sepolia.blockscout.com/tx/0x94cd802ae8c8b9425a76fe523b2b3c0ca34ece8576494dd3a193a21a212cbdd1) | One full loop started from the live page: a 10 tUSD deposit freed liquidity, and the lender's own address withdrew it 8 Base blocks (1.6 s) later |
 | [Lido request on Ethereum](https://etherscan.io/tx/0xf2687d9ff17d8e2c465539feb09f233fc094416bef4a1ee0a62c1efd848cb237) → [ErrandLido tracking it on Reactive mainnet](https://reactscan.net/tx/0x07116c760fe004f14a6c50defcc2effc6179aff81666b26372910e9f72ca0415) | The mainnet errand: a real Lido withdrawal request (#142667) from the delegated wallet, picked up by ErrandLido. The claim callback fires when Lido finalizes it. If it has landed, its tx is in [deployments/mainnet.json](deployments/mainnet.json) under `lido.claimTx` and on the live page |
 
@@ -65,7 +65,7 @@ README gives both. Over 30 rounds: 3–8 blocks (0.6–1.6 s), median 5 (1.0 s),
 timestamp Δ of 0–2 s, median 1 s. The 7 scripted rounds are in
 [evidence/race-2026-11-24.json](evidence/race-2026-11-24.json); 20 more run in a row, and the stats over
 all 30, are in [evidence/rounds-2026-11-25.json](evidence/rounds-2026-11-25.json). The other 3 ran after we
-re-armed the demo. All 30 were sent by us. The live page shows the latest 12 rounds, so a judge's own round shows up there too.
+re-armed the demo. All 30 were sent by us. The live page reads every round, so a judge's own round shows up there too.
 
 **Why EIP-7702 and not a vault?**
 A vault means moving your funds into someone else's contract. With 7702 the address, key and balance

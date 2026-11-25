@@ -38,8 +38,8 @@ after the trigger: 0.6–1.6 s, median 1.0 s (5 blocks), p95 1.6 s (8 blocks). 7
 ([evidence/race-2026-11-24.json](https://github.com/neromtoobad/errand/blob/main/evidence/race-2026-11-24.json)),
 then 23 more against the live demo, 20 of them in a row
 ([evidence/rounds-2026-11-25.json](https://github.com/neromtoobad/errand/blob/main/evidence/rounds-2026-11-25.json)).
-In block timestamps (whole seconds) that is 0–2 s, median 1 s. All 30 were sent by us; the page shows the latest
-12 rounds, including any a visitor runs. Each round links its trigger, reactive and callback txs.
+In block timestamps (whole seconds) that is 0–2 s, median 1 s. All 30 were sent by us; the page charts every
+round, including any a visitor runs. Each round links its trigger, reactive and callback txs.
 
 **Try it:** at errand.nerom.site, deposit 5–50 test tUSD (one transaction on Base Sepolia) and time how
 fast the lender's wallet takes it back.
@@ -62,7 +62,7 @@ keeper holds the key, and no server polls.
 - repay 10: [0x02df3310…](https://base-sepolia.blockscout.com/tx/0x02df331060a1e727429d94a3ac4c545f2ce6865f6ad5c13f41afafdf6e73c69b) → [0x22c12746…](https://lasna.reactscan.net/tx/0x22c127463641ef5c660c25912e2a99748c133bc0ce8c2cd5ba58472773712811) → [0xa71e9fd0…](https://base-sepolia.blockscout.com/tx/0xa71e9fd069d2554ee539e42ddb01800c8e056c81a4ccf9b147349abbfeeefcf5) (3 blocks)
 - repay rest, wallet fully out: [0x7e760c45…](https://base-sepolia.blockscout.com/tx/0x7e760c453b31325e430f5e938bb462b691a4906f030c00c55bbf9abbd8997262) → [0x7fe2c770…](https://lasna.reactscan.net/tx/0x7fe2c770033386be8ade5c1ba8ce3b558157e31f1700e82a43473821aa5c00cb) → [0xdcb45497…](https://base-sepolia.blockscout.com/tx/0xdcb454971c5215e04d576be777ae40cff19db41da2080b618707ab64d1b9ed89) (5 blocks)
 - deposit followed by the live page (round #9, sent by us): [0x0c6507b5…](https://base-sepolia.blockscout.com/tx/0x0c6507b5c512c57f6b56ca7504b331bda43c2be03a9ae0aed9f616165873e6c2) → [0xdcecb908…](https://lasna.reactscan.net/tx/0xdcecb9089f651a65cd861b03894a9a2c0900215566379304e64b510f57c2a834) → [0x94cd802a…](https://base-sepolia.blockscout.com/tx/0x94cd802ae8c8b9425a76fe523b2b3c0ca34ece8576494dd3a193a21a212cbdd1) (8 blocks)
-- All rounds: the [latency section in the README](https://github.com/neromtoobad/errand#latency-measured-on-base-sepolia) and the two evidence files; the latest 12 on the live page.
+- All rounds: the [latency section in the README](https://github.com/neromtoobad/errand#latency-measured-on-base-sepolia) and the two evidence files, and the live page.
 
 **What's test-only:** tUSD, tETH and the 1:1 price oracle are stand-ins we deployed. The market built
 on them is a real Morpho Blue market, and Reactive Lasna is the real testnet.
